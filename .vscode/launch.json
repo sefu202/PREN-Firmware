@@ -1,0 +1,43 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Debug STM32F746",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/Debug/PREN-Firmware.elf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "device": "STM32F746ZG",
+            "configFiles": [
+                "interface/stlink-v2-1.cfg",
+                "target/stm32f7x.cfg"
+            ],
+        },
+        {
+            "name": "Run STM32F746 (No Debug)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/Debug/PREN-Firmware.elf",
+            "device": "STM32F746ZG",
+            "configFiles": [
+                "interface/stlink-v2-1.cfg",
+                "target/stm32f7x.cfg"
+            ],
+            "searchDir": ["/usr/local/share/openocd/scripts"],
+            "runWithoutDebug": true,
+            "runToMain": false,
+            "preLaunchTask": "Build",
+            "postLaunchCommands": [
+                "monitor program ${workspaceFolder}/build/Debug/PREN-Firmware.elf verify",
+                "monitor reset",
+                "monitor sleep 100",
+                "monitor resume",
+                "monitor shutdown"
+            ]
+        }
+    ]
+}

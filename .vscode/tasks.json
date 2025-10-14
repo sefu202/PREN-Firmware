@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "shell",
+      "command": "make",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Flash (OpenOCD)",
+      "type": "shell",
+      "command": "openocd -s /usr/share/openocd/scripts -f interface/stlink.cfg -f target/stm32f7x.cfg -c \"program build/main.elf verify reset exit\"",
+      "group": "none",
+      "dependsOn": "Build",
+      "problemMatcher": []
+    }
+  ]
+}
