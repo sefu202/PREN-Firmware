@@ -4,7 +4,15 @@
         "main.h": "c",
         "stm32f7xx_hal_conf.h": "c",
         "stm32f7xx_hal.h": "c",
-        "stm32f7xx_hal_def.h": "c"
+        "stm32f7xx_hal_def.h": "c",
+        "gpio.h": "c",
+        "lwip.h": "c",
+        "udp.h": "c",
+        "opt.h": "c",
+        "cc.h": "c",
+        "udpserver.h": "c",
+        "lwipopts.h": "c",
+        "lan8742.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
