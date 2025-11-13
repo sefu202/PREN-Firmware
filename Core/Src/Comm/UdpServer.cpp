@@ -1,5 +1,6 @@
 #include "Comm/UdpServer.hpp"
-#include <string.h>
+#include <cstring>
+#include <vector>
 
 #define UDP_LOCAL_PORT  30000
 
