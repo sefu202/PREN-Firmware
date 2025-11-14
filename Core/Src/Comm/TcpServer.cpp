@@ -11,6 +11,7 @@
 
 #include "Comm/TcpServer.hpp"
 #include <cassert>
+#include <cstring> // std::memcpy
 
 
 namespace Comm{
@@ -18,9 +19,6 @@ namespace Comm{
 TcpServer::TcpServer(uint16_t port){
     listen(port);
 }
-
-
-
 
 err_t TcpServer::listen(uint16_t port)
 {
@@ -72,7 +70,23 @@ TcpServer::State TcpServer::getState() const {
     return m_state;
 }
 
-err_t TcpServer::write(const void *data, uint16_t len){
+void TcpServer::receive(void *buffer, uint16_t sizeBuffer){
+    assert(buffer != nullptr);
+
+    if (buffer != nullptr && sizeBuffer != 0) {
+        m_receiveBuffer = buffer;
+        m_receivedBytes = 0;
+        m_sizeReceiveBuffer = sizeBuffer;
+    }
+}
+
+uint16_t TcpServer::getReceivedBytes() const {
+    return m_receivedBytes;
+}
+
+
+err_t TcpServer::write(const void *data, uint16_t len)
+{
 
     if (m_state == State::LISTEN){
         return ERR_CONN;
@@ -86,6 +100,7 @@ err_t TcpServer::write(const void *data, uint16_t len){
     tcp_write(m_connectionPcb, data, len, TCP_WRITE_FLAG_COPY);
     tcp_output(m_connectionPcb);
 
+    return ERR_OK;
 }
 
 err_t TcpServer::accept(void *arg, struct tcp_pcb *newpcb, err_t err){
@@ -131,6 +146,7 @@ err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     if (!p) {
         tcp_close(tpcb);
         thisFromArg(arg)->m_state = State::LISTEN;
+        thisFromArg(arg)->m_connectionPcb = nullptr;
         return ERR_OK;
     }
 
@@ -144,7 +160,19 @@ err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         return ERR_ABRT;
     }
 
-    thisFromArg(arg)->write(p->payload, p->len);
+    // Receive buffer not yet ready => refuse data
+    if (thisFromArg(arg)->m_receiveBuffer == nullptr || thisFromArg(arg)->m_receivedBytes != 0) {
+        return ERR_INPROGRESS;
+    }
+
+    assert(p->len < thisFromArg(arg)->m_sizeReceiveBuffer);
+    if (p->len < thisFromArg(arg)->m_sizeReceiveBuffer) {
+        std::memcpy(thisFromArg(arg)->m_receiveBuffer, p->payload, p->len);
+        thisFromArg(arg)->m_receivedBytes = p->len;
+    }
+    else {
+        // todo this would lead to data loss
+    }
 
     tcp_recved(tpcb, p->len);
 
