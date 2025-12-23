@@ -12,7 +12,7 @@
 #include <cstring> // memcpy
 
 namespace Comm {
-
+/*
 const uint8_t *Protocol::serialize() const {
     m_lenFilled = 0;
     return m_data.data();
@@ -50,7 +50,7 @@ void Protocol::setLength(uint8_t len) {
 
 uint8_t Protocol::getFillLevel() const {
     return m_lenFilled;
-}
+}*/
 
 }
  

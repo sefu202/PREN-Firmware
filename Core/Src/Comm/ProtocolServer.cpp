@@ -14,7 +14,7 @@
 #include <cassert>
 
 namespace Comm {
-
+/*
 
 ProtocolServer::ProtocolServer(uint16_t port) 
  : tcpserver(port), m_port(m_port){
@@ -66,6 +66,6 @@ void ProtocolServer::update(){
     if (readIdx > 0) {
         tcpserver.receive(m_buffer.data(), m_buffer.size());
     }
-}
+}*/
 
 }

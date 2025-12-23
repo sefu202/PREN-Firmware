@@ -10,10 +10,20 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "device": "STM32F746ZG",
+            "interface": "swd",
+
             "configFiles": [
                 "interface/stlink-v2-1.cfg",
                 "target/stm32f7x.cfg"
             ],
+
+            "runToEntryPoint": "main",
+
+            "setupCommands": [
+                { "text": "monitor reset halt" },
+                { "text": "monitor cortex_m maskisr on" },
+                { "text": "set step-mode on" }
+            ]
         },
         {
             "name": "Run STM32F746 (No Debug)",

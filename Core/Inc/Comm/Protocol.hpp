@@ -8,8 +8,10 @@
  * @copyright Copyright (c) 2025
  * 
  */
+#pragma once
 
 #include <array>
+#include <cstdint>
 
 namespace Comm {
 

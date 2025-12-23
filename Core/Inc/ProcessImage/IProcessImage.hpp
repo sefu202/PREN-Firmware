@@ -8,6 +8,8 @@
  * @copyright Copyright (c) 2025
  * 
  */
+#pragma once
+
 #include "RGB.hpp"
 
 namespace ProcessImage {

@@ -9,6 +9,8 @@
  * 
  */
 
+#pragma once
+
 #include "IProcessImage.hpp"
 
 namespace ProcessImage {
