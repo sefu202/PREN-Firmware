@@ -10,12 +10,17 @@
  */
 #pragma once
 
+#include <cstdint>
 #include "stm32f7xx_hal.h"
 
 #define MAX_NUM_STEPPERS 10
 #define STEPPER_IRQ TIM8_BRK_TIM12_IRQn
 #define STEPPER_MAX_SPEED 255
 #define STEPPER_MIN_TICKS_BETWEEN_STEP 8    // needs to be atleast 2, put higher for better speed control for high speeds
+
+#if STEPPER_MIN_TICKS_BETWEEN_STEP < 2
+#error "STEPPER_MIN_TICKS_BETWEEN_STEP needs to be atleast 2"
+#endif
 
 namespace Stepper{
 
@@ -48,6 +53,19 @@ public:
      * @param speed
      */
     void setSpeed(uint16_t speed);
+
+    /**
+     * @brief Get remaining steps
+     * 
+     * @return uint32_t 
+     */
+    uint32_t getRemainingSteps() const;
+
+    /**
+     * @brief Clears all remaining steps
+     * 
+     */
+    void resetSteps();
 
     /**
      * @brief Interrupt service routine, call periodically

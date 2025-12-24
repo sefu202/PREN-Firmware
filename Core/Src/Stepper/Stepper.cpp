@@ -48,6 +48,7 @@ void Stepper::step(int32_t steps) {
 }
 
 void Stepper::setSpeed(uint16_t speed) {
+    assert(speed <= STEPPER_MAX_SPEED);
     if (speed > STEPPER_MAX_SPEED) {
         speed = STEPPER_MAX_SPEED;
     }
@@ -59,13 +60,23 @@ void Stepper::setSpeed(uint16_t speed) {
         ticks = STEPPER_MAX_SPEED * STEPPER_MIN_TICKS_BETWEEN_STEP / speed;
     }
     HAL_NVIC_DisableIRQ(STEPPER_IRQ);
-    s_tickBetweenSteps[m_stepperId] = ticks; // todo
+    s_tickBetweenSteps[m_stepperId] = ticks;
     HAL_NVIC_EnableIRQ(STEPPER_IRQ);
 }
 
+uint32_t Stepper::getRemainingSteps() const {
+    uint32_t remainingSteps = 0;
+    HAL_NVIC_DisableIRQ(STEPPER_IRQ);
+    remainingSteps = s_remainingSteps[m_stepperId];
+    HAL_NVIC_EnableIRQ(STEPPER_IRQ);
+    return remainingSteps;
+}
 
-
-
+void Stepper::resetSteps() {
+    HAL_NVIC_DisableIRQ(STEPPER_IRQ);
+    s_remainingSteps[m_stepperId] = 0;
+    HAL_NVIC_EnableIRQ(STEPPER_IRQ);    
+}
 
 volatile Stepper::PinConfig Stepper::s_stepperPinConfig[MAX_NUM_STEPPERS];
 volatile int32_t Stepper::s_remainingSteps[MAX_NUM_STEPPERS];      // remaining steps and direction
@@ -75,20 +86,19 @@ volatile uint16_t Stepper::s_tickBetweenSteps[MAX_NUM_STEPPERS];   // for speed 
 void Stepper::ISR(){
 
 
-
     for (uint8_t i = 0; i < MAX_NUM_STEPPERS; i++) {
         if (s_stepperPinConfig[i].stepGpio != nullptr) { // Stepper is configured
-            if (s_currentTickBetweenSteps[i] == s_tickBetweenSteps[i]/2) {
+            if (s_currentTickBetweenSteps[i] == s_tickBetweenSteps[i]/2) {  // reset step when half ticks have elapsed
                 HAL_GPIO_WritePin(s_stepperPinConfig[i].stepGpio, s_stepperPinConfig[i].stepPin, GPIO_PIN_RESET);
 
-                if (s_remainingSteps[i] < 0) {
+                if (s_remainingSteps[i] < 0) {  // Direction control, done when step is low
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_SET);
                 }
                 else {
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_RESET);
                 }
             }
-            else if (s_currentTickBetweenSteps[i] >= s_tickBetweenSteps[i]) {
+            else if (s_currentTickBetweenSteps[i] >= s_tickBetweenSteps[i]) {   // Do step when ticks have elapsed
                 s_currentTickBetweenSteps[i]  = 0;
                 if (s_remainingSteps[i] > 0){
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].stepGpio, s_stepperPinConfig[i].stepPin, GPIO_PIN_SET);
