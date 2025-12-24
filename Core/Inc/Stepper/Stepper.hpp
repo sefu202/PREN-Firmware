@@ -15,7 +15,8 @@
 
 #define MAX_NUM_STEPPERS 10
 #define STEPPER_IRQ TIM8_BRK_TIM12_IRQn
-#define STEPPER_MAX_SPEED 255
+#define STEPPER_IRQ_TICKRATE 10000  // [hz] set accoring to configuration
+#define STEPPER_MAX_SPEED STEPPER_IRQ_TICKRATE / STEPPER_MIN_TICKS_BETWEEN_STEP
 #define STEPPER_MIN_TICKS_BETWEEN_STEP 8    // needs to be atleast 2, put higher for better speed control for high speeds
 
 #if STEPPER_MIN_TICKS_BETWEEN_STEP < 2

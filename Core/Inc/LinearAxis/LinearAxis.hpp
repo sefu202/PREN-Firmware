@@ -30,7 +30,13 @@ public:
      */
     void moveTo(uint32_t setPoint);
 
+    void init();
 
+
+    void update();
+
+
+    void stop();
 
 private:
     Stepper::Stepper& m_stepper;   // stepper motor reference
