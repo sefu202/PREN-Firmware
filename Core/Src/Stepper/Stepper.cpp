@@ -88,17 +88,8 @@ void Stepper::ISR(){
 
     for (uint8_t i = 0; i < MAX_NUM_STEPPERS; i++) {
         if (s_stepperPinConfig[i].stepGpio != nullptr) { // Stepper is configured
-            if (s_currentTickBetweenSteps[i] == s_tickBetweenSteps[i]/2) {  // reset step when half ticks have elapsed
-                HAL_GPIO_WritePin(s_stepperPinConfig[i].stepGpio, s_stepperPinConfig[i].stepPin, GPIO_PIN_RESET);
 
-                if (s_remainingSteps[i] < 0) {  // Direction control, done when step is low
-                    HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_SET);
-                }
-                else {
-                    HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_RESET);
-                }
-            }
-            else if (s_currentTickBetweenSteps[i] >= s_tickBetweenSteps[i]) {   // Do step when ticks have elapsed
+            if (s_currentTickBetweenSteps[i] >= s_tickBetweenSteps[i] && s_tickBetweenSteps[i] != 0) {   // Do step when ticks have elapsed
                 s_currentTickBetweenSteps[i]  = 0;
                 if (s_remainingSteps[i] > 0){
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].stepGpio, s_stepperPinConfig[i].stepPin, GPIO_PIN_SET);
@@ -107,6 +98,16 @@ void Stepper::ISR(){
                 } else if (s_remainingSteps[i] < 0) {
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].stepGpio, s_stepperPinConfig[i].stepPin, GPIO_PIN_SET);
                     s_remainingSteps[i]++;
+                }
+            }
+            else {
+                HAL_GPIO_WritePin(s_stepperPinConfig[i].stepGpio, s_stepperPinConfig[i].stepPin, GPIO_PIN_RESET);
+
+                if (s_remainingSteps[i] < 0) {  // Direction control, done when step is low
+                    HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_SET);
+                }
+                else {
+                    HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_RESET);
                 }
             }
             s_currentTickBetweenSteps[i]++;

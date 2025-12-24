@@ -6,6 +6,7 @@
 #include "Comm/TcpServer.hpp"
 #include <cstring>
 #include "Stepper/Stepper.hpp"
+#include "LinearAxis/LinearAxis.hpp"
 
 using namespace Stepper;
 
@@ -31,10 +32,8 @@ extern "C" int application(void){
    // HAL_GPIO_WritePin(STEP1_M1_GPIO_Port, STEP1_M1_Pin, GPIO_PIN_SET);
     //HAL_GPIO_WritePin(STEP1_M2_GPIO_Port, STEP1_M2_Pin, GPIO_PIN_SET);
 
-    step1.step(100);
-
-
-    uint8_t speed = 0;
+    LinearAxis xAxis(step1);
+    xAxis.moveTo(1000000);
 
     while(1) {
         if (tcpserver.getState() != Comm::TcpServer::State::LISTEN || tcpserver.getState() != Comm::TcpServer::State::ACCEPTED){
@@ -46,9 +45,16 @@ extern "C" int application(void){
             tcpserver.receive(buffer,sizeof(buffer));
         }
 
-        step1.setSpeed(speed);
-        step1.step(-10);
         MX_LWIP_Process();
+        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+        for (uint16_t speed = 1; speed < 256; speed++) {
+            step1.setSpeed(speed);
+            HAL_Delay(2);
+        }
+        for (uint16_t speed = 255; speed; speed--) {
+            step1.setSpeed(speed);
+            HAL_Delay(2);
+        }
     }
     return 0;
 }
