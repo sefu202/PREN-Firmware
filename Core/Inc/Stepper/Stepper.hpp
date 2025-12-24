@@ -58,9 +58,9 @@ public:
     /**
      * @brief Get remaining steps
      * 
-     * @return uint32_t 
+     * @return int32_t remaining steps and direction
      */
-    uint32_t getRemainingSteps() const;
+    int32_t getRemainingSteps() const;
 
     /**
      * @brief Clears all remaining steps

@@ -64,8 +64,8 @@ void Stepper::setSpeed(uint16_t speed) {
     HAL_NVIC_EnableIRQ(STEPPER_IRQ);
 }
 
-uint32_t Stepper::getRemainingSteps() const {
-    uint32_t remainingSteps = 0;
+int32_t Stepper::getRemainingSteps() const {
+    int32_t remainingSteps = 0;
     HAL_NVIC_DisableIRQ(STEPPER_IRQ);
     remainingSteps = s_remainingSteps[m_stepperId];
     HAL_NVIC_EnableIRQ(STEPPER_IRQ);

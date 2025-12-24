@@ -13,20 +13,31 @@
 #include "LinearAxis/LinearAxisRamp.hpp"
 
 
-uint16_t LinearAxisRamp::getSpeed() {
+LinearAxisRamp::LinearAxisRamp(uint16_t a, uint16_t maxSpeed) : m_a(a), m_maxSpeed(maxSpeed){
+    reset();
+}
+
+uint16_t LinearAxisRamp::getSpeed(uint32_t distance) {
     uint16_t speedPos = posRampSpeed();
-    uint16_t speedNeg = negRampSpeed();
+    uint16_t speedNeg = negRampSpeed(distance);
     m_lastSpeed = std::min(speedPos, std::min(speedNeg, m_maxSpeed));
     return m_lastSpeed;
 }
 
 uint16_t LinearAxisRamp::posRampSpeed() {
     uint32_t dt = HAL_GetTick() - m_lastTick;
-    m_lastTick += dt;
-    uint16_t speedPos = std::min(m_lastSpeed + m_a * dt, (uint32_t)UINT16_MAX);
+    uint32_t dv = m_a * dt / 10;
+    m_lastTick += dv * 10 / m_a;
+    uint16_t speedPos = std::min(m_lastSpeed + dv, (uint32_t)UINT16_MAX);
     return speedPos;
 }
 
-uint16_t LinearAxisRamp::negRampSpeed() {
-    return std::sqrt(2*m_a*1000*m_distance);
+uint16_t LinearAxisRamp::negRampSpeed(uint32_t distance) {
+    return std::sqrt(2*m_a*100*distance);
+}
+
+
+void LinearAxisRamp::reset() {
+    m_lastTick = HAL_GetTick();
+    m_lastSpeed = 0;
 }

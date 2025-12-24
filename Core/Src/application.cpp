@@ -32,7 +32,7 @@ extern "C" int application(void){
    // HAL_GPIO_WritePin(STEP1_M1_GPIO_Port, STEP1_M1_Pin, GPIO_PIN_SET);
     //HAL_GPIO_WritePin(STEP1_M2_GPIO_Port, STEP1_M2_Pin, GPIO_PIN_SET);
 
-    LinearAxis xAxis(step1);
+    LinearAxis xAxis(step1, 50, 1250);
     xAxis.moveTo(1000000);
 
     while(1) {
@@ -46,15 +46,29 @@ extern "C" int application(void){
         }
 
         MX_LWIP_Process();
-        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
-        for (uint16_t speed = 1; speed < 256; speed++) {
-            step1.setSpeed(speed);
-            HAL_Delay(2);
+
+        for(uint16_t i = 0; i < 2000; i++) {
+            xAxis.update();
+            HAL_Delay(1);
         }
-        for (uint16_t speed = 255; speed; speed--) {
-            step1.setSpeed(speed);
-            HAL_Delay(2);
+        xAxis.moveTo(4000);
+        for(uint16_t i = 0; i < 2000; i++) {
+            xAxis.update();
+            HAL_Delay(1);
         }
+        xAxis.moveTo(2000);
+        for(uint16_t i = 0; i < 2000; i++) {
+            xAxis.update();
+            HAL_Delay(1);
+        }
+        xAxis.moveTo(3000);
+        for(uint16_t i = 0; i < 2000; i++) {
+            xAxis.update();
+            HAL_Delay(1);
+        }
+        xAxis.moveTo(1000);
+
+
     }
     return 0;
 }
