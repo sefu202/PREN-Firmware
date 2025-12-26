@@ -106,7 +106,7 @@ void Stepper::ISR(){
                 if (s_remainingSteps[i] < 0) {  // Direction control, done when step is low
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_SET);
                 }
-                else {
+                else if (s_remainingSteps[i] > 0) {
                     HAL_GPIO_WritePin(s_stepperPinConfig[i].dirGpio, s_stepperPinConfig[i].dirPin, GPIO_PIN_RESET);
                 }
             }

@@ -7,6 +7,7 @@
 #include <cstring>
 #include "Stepper/Stepper.hpp"
 #include "LinearAxis/LinearAxis.hpp"
+#include "Util/Debounce.hpp"
 
 using namespace Stepper;
 
@@ -28,13 +29,14 @@ extern "C" int application(void){
 
     HAL_GPIO_WritePin(STEP1_EN_GPIO_Port, STEP1_EN_Pin, GPIO_PIN_SET);
 
-    HAL_GPIO_WritePin(STEP1_M0_GPIO_Port, STEP1_M0_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(STEP1_M0_GPIO_Port, STEP1_M0_Pin, GPIO_PIN_SET);  // half step
    // HAL_GPIO_WritePin(STEP1_M1_GPIO_Port, STEP1_M1_Pin, GPIO_PIN_SET);
     //HAL_GPIO_WritePin(STEP1_M2_GPIO_Port, STEP1_M2_Pin, GPIO_PIN_SET);
 
-    LinearAxis xAxis(step1, 50, 1250);
-    xAxis.moveTo(1000000);
-
+    LinearAxis xAxis(step1, 50, 1250, 200, 1000000);    // a, maxSpeed, initSpeed, length
+    xAxis.init();
+    EdgePos initializedPos;
+    Debounce limSwXLow, limSwXHigh;
     while(1) {
         if (tcpserver.getState() != Comm::TcpServer::State::LISTEN || tcpserver.getState() != Comm::TcpServer::State::ACCEPTED){
             tcpserver.listen(30000);
@@ -47,28 +49,21 @@ extern "C" int application(void){
 
         MX_LWIP_Process();
 
-        for(uint16_t i = 0; i < 2000; i++) {
-            xAxis.update();
-            HAL_Delay(1);
-        }
-        xAxis.moveTo(4000);
-        for(uint16_t i = 0; i < 2000; i++) {
-            xAxis.update();
-            HAL_Delay(1);
-        }
-        xAxis.moveTo(2000);
-        for(uint16_t i = 0; i < 2000; i++) {
-            xAxis.update();
-            HAL_Delay(1);
-        }
-        xAxis.moveTo(3000);
-        for(uint16_t i = 0; i < 2000; i++) {
-            xAxis.update();
-            HAL_Delay(1);
-        }
-        xAxis.moveTo(1000);
 
+        bool usrBtn = HAL_GPIO_ReadPin(USER_BTN_GPIO_Port, USER_BTN_Pin) == GPIO_PIN_SET ? true : false;
 
+        limSwXLow(!HAL_GPIO_ReadPin(LIM_SW_X_LOW_GPIO_Port, LIM_SW_X_LOW_Pin));
+        limSwXHigh(!HAL_GPIO_ReadPin(LIM_SW_X_HIGH_GPIO_Port, LIM_SW_X_HIGH_Pin));
+        if (initializedPos(xAxis.isInitialized())) {
+            xAxis.moveTo(4000);
+        }
+
+        xAxis.update(limSwXLow, limSwXHigh);
+        if (usrBtn){
+            xAxis.estop();
+        }
+
+        HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
     }
     return 0;
 }
