@@ -6,6 +6,7 @@
 #include "Comm/TcpServer.hpp"
 #include <cstring>
 #include "Stepper/Stepper.hpp"
+#include "Stepper/StepperMusicPlayer.hpp"
 #include "LinearAxis/LinearAxis.hpp"
 #include "Util/Debounce.hpp"
 
@@ -34,6 +35,11 @@ extern "C" int application(void){
     //HAL_GPIO_WritePin(STEP1_M2_GPIO_Port, STEP1_M2_Pin, GPIO_PIN_SET);
 
     LinearAxis xAxis(step1, 50, 1250, 200, 1000000);    // a, maxSpeed, initSpeed, length
+    StepperMusicPlayer player(step1);
+
+
+
+
     xAxis.init();
     EdgePos initializedPos;
     Debounce limSwXLow, limSwXHigh;
@@ -64,6 +70,9 @@ extern "C" int application(void){
         }
 
         HAL_GPIO_TogglePin(LED_RED_GPIO_Port, LED_RED_Pin);
+        player.play();
+
+        HAL_Delay(1000);
     }
     return 0;
 }
