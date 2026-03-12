@@ -10,20 +10,32 @@
  */
 #include "Comm/Protocol.hpp"
 #include <cstring> // memcpy
+#include <cassert>
 
 namespace Comm {
-/*
+
 const uint8_t *Protocol::serialize() const {
-    m_lenFilled = 0;
     return m_data.data();
 }
 
-void Protocol::appendData(uint8_t *data, uint8_t len) {
+void Protocol::appendData(const uint8_t *data, uint8_t len) {
     if (len < (m_data.size() - m_lenFilled)) {
         std::memcpy(m_data.data() + m_lenFilled, data, len);
+        m_lenFilled += len;
     }
     else {
         assert(0); // not good
+        // todo
+    }
+}
+
+void Protocol::appendByte(const uint8_t byte) {
+    if (1 < (m_data.size() - m_lenFilled)) {
+        m_data[m_lenFilled++] = byte;
+    }
+    else {
+        assert(0);
+        // todo
     }
 }
 
@@ -37,9 +49,10 @@ void Protocol::setOpcode(uint8_t opcode) {
     }
 }
 
-uint8_t Protocol::getLenght() const {
+uint8_t Protocol::getLength() const {
     return (m_lenFilled >= 2) ? m_data[1] : 0;
 }
+
 void Protocol::setLength(uint8_t len) {
     m_data[1] = len;
 
@@ -48,9 +61,21 @@ void Protocol::setLength(uint8_t len) {
     }
 }
 
+
+const uint8_t* Protocol::getData() const {
+    return m_data.data()+2;
+}
+
 uint8_t Protocol::getFillLevel() const {
     return m_lenFilled;
-}*/
+}
+
+void Protocol::clear() {
+    m_lenFilled = 0;
+    m_data[0] = 0;
+    m_data[1] = 0;
+}
+
 
 }
  

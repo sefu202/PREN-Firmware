@@ -17,20 +17,34 @@ namespace ProcessImage {
 
 class ProcessImage : public IProcessImage{
 public:
-    void setXTarget(uint32_t) override;
+    bool setXTarget(uint32_t) override;
     uint32_t getXTarget() override;
-    void setYTarget(uint32_t) override;
+    bool setYTarget(uint32_t) override;
     uint32_t getYTarget() override;
-    void setZTarget(uint32_t) override;
+    bool setZTarget(uint32_t) override;
     uint32_t getZTarget() override;
-    void setMagnet(bool) override;
-    bool getMagnet() override;
-    void setRotDelta(uint32_t) override;
+    bool setVacuum(bool) override;
+    bool getVacuum() override;
+    bool setRot(int32_t) override;
     uint32_t getRotDelta() override;
-    void setShootConfetti(bool) override;
+    bool setShootConfetti(bool) override;
     bool getShootConfetti() override;
-    void setLed(RGB rgb) override;
+    bool setLed(RGB rgb) override;
     RGB getLed(void) override;
+
+
+    bool getEstop() override;
+    bool getStartButton() override;
+    uint8_t getLimitSwitches() override;
+    bool getVacuumState() override;
+    uint32_t getXPosition() override;
+    uint32_t getYPosition() override;
+    uint32_t getZPosition() override;
+    int32_t getRotPosition() override;
+    bool isInitialized() override;
+
+
+    void update();
 
 private:
 

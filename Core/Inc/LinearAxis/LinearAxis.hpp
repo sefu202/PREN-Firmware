@@ -25,7 +25,7 @@ public:
      * @param maxA max acceleration in 100 * steps / s^2
      * @param maxSpeed max speed in steps / s
      * @param initSpeed speed when initializing
-     * @param lenght length of the linear axis in steps
+     * @param length length of the linear axis in steps
      */
     LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpeed, uint16_t initSpeed, uint32_t length);
 

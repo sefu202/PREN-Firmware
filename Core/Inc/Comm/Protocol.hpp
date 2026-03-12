@@ -32,7 +32,15 @@ public:
      * @param data 
      * @param len 
      */
-    void appendData(uint8_t *data, uint8_t len);
+    void appendData(const uint8_t *data, uint8_t len);
+
+
+    /**
+     * @brief appends a single byte to the protocol
+     * 
+     * @param byte byte to append
+     */
+    void appendByte(const uint8_t byte);
 
     /**
      * @brief Get the Opcode object
@@ -42,17 +50,26 @@ public:
     uint8_t getOpcode() const;
 
     /**
-     * @brief Set the Opcode object
+     * @brief Set the Opcode
+     * 
+     * @param opcode opcode
      * 
      */
-    void setOpcode();
+    void setOpcode(uint8_t opcode);
 
     /**
-     * @brief Get the Lenght object
+     * @brief Get the Length object
      * 
      * @return uint8_t 
      */
-    uint8_t getLenght() const;
+    uint8_t getLength() const;
+
+    /**
+     * @brief Get the Data
+     * 
+     * @return const uint8_t* pointer to data
+     */
+    const uint8_t* getData() const;
 
     /**
      * @brief Set the Length object
@@ -62,6 +79,12 @@ public:
     void setLength(uint8_t len);
 
     uint8_t getFillLevel() const;
+
+    /**
+     * @brief Clears data
+     * 
+     */
+    void clear();
 
 private:
 
