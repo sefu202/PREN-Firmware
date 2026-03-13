@@ -14,40 +14,60 @@
 namespace ProcessImage {
 
 
-bool ProcessImage::setXTarget(uint32_t) {
-    return false;
+ProcessImage::ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis) 
+  : m_xAxis(xAxis), m_yAxis(yAxis), m_zAxis(zAxis) {
+
+}
+
+bool ProcessImage::setXTarget(uint32_t target) {
+    if (target > m_xAxis.getLength()) {
+        return false;
+    }
+
+    m_xAxis.moveTo(target);
+    return true;
 }
 
 uint32_t ProcessImage::getXTarget() {
-    // todo
+    // todo remove
     return 0;
 }
 
-bool ProcessImage::setYTarget(uint32_t) {
-    return false;
+bool ProcessImage::setYTarget(uint32_t target) {
+    if (target > m_yAxis.getLength()) {
+        return false;
+    }
+
+    m_yAxis.moveTo(target);
+    return true;
 }
 
 uint32_t ProcessImage::getYTarget() {
-    // todo
+    // todo remove
     return 0;
 }
 
-bool ProcessImage::setZTarget(uint32_t) {
-    return false;
+bool ProcessImage::setZTarget(uint32_t target) {
+    if (target > m_zAxis.getLength()) {
+        return false;
+    }
+
+    m_zAxis.moveTo(target);
+    return true;
 }
 
 uint32_t ProcessImage::getZTarget() {
-    // todo
+    // todo remove
     return 0;
 }
 
-bool ProcessImage::setVacuum(bool) {
-    return false;
+bool ProcessImage::setVacuum(bool vacuum) {
+    m_vacuum = vacuum;
+    return true;
 }
 
 bool ProcessImage::getVacuum() {
-    // todo
-    return 0;
+    return m_vacuum;
 }
 
 bool ProcessImage::setRot(int32_t) {
@@ -59,65 +79,76 @@ uint32_t ProcessImage::getRotDelta() {
     return 0;
 }
 
-bool ProcessImage::setShootConfetti(bool) {
-    return false;
+bool ProcessImage::setShootConfetti(bool shootConfetti) {
+    m_shootConfetti = shootConfetti;
+    return true;
 }
 
 bool ProcessImage::getShootConfetti() {
-    // todo
-    return false;
+    return m_shootConfetti;
 }
 
 bool ProcessImage::setLed(RGB rgb) {
-    return false;
+    m_led = rgb;
+    return true;
 }
 
 RGB ProcessImage::getLed(void) {
-    // todo
-    return RGB{.r=0, .g = 0, .b = 0};
+    return m_led;
 }
 
 
 void ProcessImage::update() {
-    // todo
+    // todo reset shootconfetti
 }
 
-bool ProcessImage::getEstop() { 
-    // todo
-    return true;
+void ProcessImage::setEstop(bool estop) {
+    m_estop = estop;
+}
+
+bool ProcessImage::getEstop() {
+    return m_estop;
+}
+
+void ProcessImage::setStartButton(bool startButton) {
+    m_startButton = startButton;
 }
 
 bool ProcessImage::getStartButton() { 
-    // todo
-    return false;
+    return m_startButton;
 }
-uint8_t ProcessImage::getLimitSwitches() { 
-    // todo
-    return 0x00;
+
+void ProcessImage::setLimitSwitches(uint8_t limSw) {
+    m_limSw = limSw;
 }
-bool ProcessImage::getVacuumState() { 
-    // todo
-    return false;
+
+uint8_t ProcessImage::getLimitSwitches() {
+    return m_limSw;
 }
-uint32_t ProcessImage::getXPosition() { 
-    // todo
-    return UINT32_MAX;
+
+bool ProcessImage::getVacuumState() {
+    return getVacuum();
 }
-uint32_t ProcessImage::getYPosition() { 
-    // todo
-    return UINT32_MAX;
+
+uint32_t ProcessImage::getXPosition() {
+    return m_xAxis.getCurrentPosition();
 }
+
+uint32_t ProcessImage::getYPosition() {
+    return m_yAxis.getCurrentPosition();
+}
+
 uint32_t ProcessImage::getZPosition() { 
-    // todo
-    return UINT32_MAX;
+    return m_zAxis.getCurrentPosition();
 }
-int32_t ProcessImage::getRotPosition() { 
+
+int32_t ProcessImage::getRotPosition() {
     // todo
     return 0;
 }
+
 bool ProcessImage::isInitialized() { 
-    // todo
-    return false;
+    return m_xAxis.isInitialized() && m_yAxis.isInitialized() && m_zAxis.isInitialized();
 }
 
 }

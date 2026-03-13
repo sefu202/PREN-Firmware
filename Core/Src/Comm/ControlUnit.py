@@ -301,20 +301,6 @@ if __name__ == "__main__":
 
     cu = ControlUnit()
     cu.startCommunication()
-    cu.stopCommunication()
-    time.sleep(1)
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((HOST, PORT))
-
-        time.sleep(1)
-
-        while True:
-            s.send(b"yeye")
-
-
-            time.sleep(1)
-
-
 
 
     cu.join()

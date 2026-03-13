@@ -71,6 +71,14 @@ public:
      */
     bool isInitialized() const;
 
+
+    /**
+     * @brief Returns the length of the linear axis
+     * 
+     * @return uint32_t length in steps
+     */
+    uint32_t getLength() const;
+
 private:
     Stepper::Stepper& m_stepper;   // stepper motor reference
     LinearAxisRamp m_ramp;

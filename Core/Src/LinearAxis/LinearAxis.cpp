@@ -78,3 +78,7 @@ void LinearAxis::estop() {
 bool LinearAxis::isInitialized() const{
     return m_initialized;
 }
+
+uint32_t LinearAxis::getLength() const {
+    return m_length;
+}

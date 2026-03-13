@@ -12,11 +12,15 @@
 #pragma once
 
 #include "IProcessImage.hpp"
+#include "LinearAxis/LinearAxis.hpp"
 
 namespace ProcessImage {
 
 class ProcessImage : public IProcessImage{
 public:
+
+    ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis);
+
     bool setXTarget(uint32_t) override;
     uint32_t getXTarget() override;
     bool setYTarget(uint32_t) override;
@@ -32,9 +36,11 @@ public:
     bool setLed(RGB rgb) override;
     RGB getLed(void) override;
 
-
+    void setEstop(bool estop);
     bool getEstop() override;
+    void setStartButton(bool startButton);
     bool getStartButton() override;
+    void setLimitSwitches(uint8_t limSw);
     uint8_t getLimitSwitches() override;
     bool getVacuumState() override;
     uint32_t getXPosition() override;
@@ -48,8 +54,12 @@ public:
 
 private:
 
+    LinearAxis &m_xAxis, &m_yAxis, &m_zAxis;
+
+    uint32_t m_xTarget = 0;
     
-    bool m_confetti;
+    bool m_shootConfetti, m_vacuum, m_estop, m_startButton;
+    uint8_t m_limSw;
     RGB m_led;
 };
 

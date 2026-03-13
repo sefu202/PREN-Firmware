@@ -1,6 +1,6 @@
 /**
  * @file Debounce.cpp
- * @author your name (you@domain.com)
+ * @author Josef Aschwanden (josef.aschwanden@stud.hslu.ch)
  * @brief 
  * @version 0.1
  * @date 2025-12-26
