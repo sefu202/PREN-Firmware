@@ -289,10 +289,10 @@ def checkOtherReply(response):
     if response == None or response["opcode"] == None or response["opcode"] != 255 or response["length"] != 3 or response["data"] == None or len(response["data"]) != 1:
         raise Exception("Invalid OtherReply")
     
-    if int(response["data"]) == 1:
+    if int.from_bytes(response["data"], byteorder="big") == 1:
         raise Exception("Reply from control unit: Invalid value sent to control unit")
     
-    if int(response["data"]) == 2:
+    if int.from_bytes(response["data"], byteorder="big") == 2:
         raise Exception("Reply from control unit: Invalid opcode sent to control unit")
     
             
@@ -301,7 +301,10 @@ if __name__ == "__main__":
 
     cu = ControlUnit()
     cu.startCommunication()
+    cu.setXTarget(0)
+    while not cu.getProcessImage().xPositionSteps == 0: pass
 
+    cu.stopCommunication()
 
     cu.join()
 

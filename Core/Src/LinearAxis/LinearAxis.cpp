@@ -72,6 +72,7 @@ void LinearAxis::estop() {
     m_stepper.setSpeed(0);
     m_stepper.resetSteps();
     m_initialized = false;  // assume steps have been lost
+    m_positionSetPoint = 0;
 }
 
 
