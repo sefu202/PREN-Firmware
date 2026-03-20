@@ -58,8 +58,8 @@ private:
 
     uint32_t m_xTarget = 0;
     
-    bool m_shootConfetti, m_vacuum, m_estop, m_startButton;
-    uint8_t m_limSw;
+    bool m_shootConfetti = false, m_vacuum = false, m_estop = false, m_startButton = false;
+    uint8_t m_limSw = 0;
     RGB m_led;
 };
 

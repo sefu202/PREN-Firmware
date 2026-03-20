@@ -104,6 +104,11 @@ void ProcessImage::update() {
 
 void ProcessImage::setEstop(bool estop) {
     m_estop = estop;
+
+    if (estop) {
+        m_vacuum = false;   // reset vacuum on estop
+        m_shootConfetti = false; // reset confetti cannon on estop
+    }
 }
 
 bool ProcessImage::getEstop() {

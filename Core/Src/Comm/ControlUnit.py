@@ -152,7 +152,7 @@ class ControlUnit:
         Args:
             enableVacuum (bool): true = enable vacuum, false = disable vacuum
         """
-        if enableVacuum is not bool:
+        if not isinstance(enableVacuum, bool):
             raise Exception("Invalid parameter enableVacuum must be bool")
         
         with self._mutex:
@@ -301,8 +301,7 @@ if __name__ == "__main__":
 
     cu = ControlUnit()
     cu.startCommunication()
-    cu.setXTarget(0)
-    while not cu.getProcessImage().xPositionSteps == 0: pass
+    cu.setEnableVacuum(True)
 
     cu.stopCommunication()
 

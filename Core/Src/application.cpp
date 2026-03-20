@@ -10,6 +10,7 @@
 #include "Stepper/StepperMusicPlayer.hpp"
 #include "LinearAxis/LinearAxis.hpp"
 #include "Util/Debounce.hpp"
+#include "Actuators/Vacuum.hpp"
 
 using namespace Stepper;
 
@@ -111,7 +112,11 @@ extern "C" int application(void){
     std::array<bool,13> DI; // DI[0] is user button on nucleo!
     std::array<bool,13> DO; // DO[0] unused!
     std::array<Debounce, 6> limSw;
-    EdgePos eStopReleased;
+    EdgePos eStopReleasedEdge;
+
+
+    // Vacuum Subsystem
+    Vacuum vacuum;
 
     while(1) {
 
@@ -155,15 +160,19 @@ extern "C" int application(void){
         //HAL_GPIO_WritePin(STEP5_ENABLE_GPIO_Port, STEP5_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
 
         // Initialize after E-Stop
-        eStopReleased(!estop);
-        if (eStopReleased) {
-            xAxis.init();
+        eStopReleasedEdge(!estop);
+        if (eStopReleasedEdge) {
+            //xAxis.init();
            // yAxis.init();
         }
 
+        // Vacuum System
+        vacuum.update(processImage.getVacuum(), estop);
+
         processImage.update();
-        DO[1] = processImage.getVacuum();   // Vacuum Pump
-        DO[2] = processImage.getVacuum();   // Valve
+        DO[1] = vacuum.oRunPump();   // Vacuum Pump
+        DO[2] = vacuum.oEnableValve();   // Valve
+        DO[5] = false; // confetti cannon
 
         writeDO(DO);
     }
