@@ -11,6 +11,7 @@
 #include "LinearAxis/LinearAxis.hpp"
 #include "Util/Debounce.hpp"
 #include "Actuators/Vacuum.hpp"
+#include "Actuators/ConfettiCannon.hpp"
 
 using namespace Stepper;
 
@@ -73,7 +74,7 @@ extern "C" int application(void){
     step3PinConfig.dirPin = STEP3_DIR_Pin;
     Stepper::Stepper step3(step3PinConfig);
 
-    // Secondary Z-Axis (Stepper 4)
+    // Twin Z-Axis (Stepper 4)
     Stepper::Stepper::PinConfig step4PinConfig;
     step4PinConfig.stepGpio = STEP4_STEP_GPIO_Port;
     step4PinConfig.stepPin = STEP4_STEP_Pin;
@@ -95,9 +96,10 @@ extern "C" int application(void){
     HAL_GPIO_WritePin(STEP4_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_RESET);  // half step
     HAL_GPIO_WritePin(STEP4_M1_GPIO_Port, STEP4_M1_Pin, GPIO_PIN_SET);
 
-    LinearAxis xAxis  (step1, 50, 1250, 350, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis yAxis  (step2, 50, 1250, 50, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxis  (step3, 50, 50, 50, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis xAxis        (step1, 50, 1250, 350, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis yAxis        (step2, 50, 1250, 50, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxis        (step3, 50, 50, 50, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxisTwin    (step4, 50, 50, 50, 1000000);  // a, maxSpeed, initSpeed, length
     xAxis.init();
     //yAxis.init();
     //zAxis.init();
@@ -117,6 +119,9 @@ extern "C" int application(void){
 
     // Vacuum Subsystem
     Vacuum vacuum;
+
+    // Confetti Cannon Subsystem
+    ConfettiCannon cannon;
 
     while(1) {
 
@@ -146,12 +151,14 @@ extern "C" int application(void){
         xAxis.update(limSw[0], limSw[1]);
         yAxis.update(limSw[2], limSw[3]);
         zAxis.update(limSw[4], limSw[5]);
+        zAxisTwin.update(false,false);
 
         // Emergency Stop
         if (estop){
             xAxis.estop();
             yAxis.estop();
             zAxis.estop();
+            zAxisTwin.estop();
         }
         HAL_GPIO_WritePin(STEP1_ENABLE_GPIO_Port, STEP1_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
@@ -168,13 +175,18 @@ extern "C" int application(void){
 
         // Vacuum System
         vacuum.update(processImage.getVacuum(), estop);
+        cannon.update(processImage.getShootConfetti(), estop);
 
-        processImage.update();
+
+
+
         DO[1] = vacuum.oRunPump();   // Vacuum Pump
         DO[2] = vacuum.oEnableValve();   // Valve
-        DO[5] = false; // confetti cannon
+        DO[5] = cannon.oIgnite(); // confetti cannon
 
         writeDO(DO);
+
+        processImage.update();
     }
     return 0;
 }

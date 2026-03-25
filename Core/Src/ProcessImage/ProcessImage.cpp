@@ -99,7 +99,7 @@ RGB ProcessImage::getLed(void) {
 
 
 void ProcessImage::update() {
-    // todo reset shootconfetti
+    m_shootConfetti = false;
 }
 
 void ProcessImage::setEstop(bool estop) {

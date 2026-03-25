@@ -10,6 +10,7 @@
  */
 #include <cmath>
 #include "LinearAxis/LinearAxis.hpp"
+#include <algorithm> // min, max
 
 
 
@@ -26,7 +27,8 @@ void LinearAxis::moveTo(uint32_t setPoint) {
         m_stepper.setSpeed(0);  // make sure no steps are done after reading position
         int32_t positionCurrent = getCurrentPosition();
         m_stepper.resetSteps();
-        m_positionSetPoint = setPoint;
+        
+        m_positionSetPoint = std::min(std::max(setPoint, 0ul), m_length);
         m_stepper.step(m_positionSetPoint - positionCurrent);
     }
 }
@@ -56,6 +58,7 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
     }
 
     if (m_lowLimitSwitchEdgePos(lowLimitSwitch)) {
+        m_positionSetPoint = std::max(m_positionSetPoint, 0l);
         m_stepper.resetSteps();
         m_stepper.step(m_positionSetPoint);
         m_initialized = true;
@@ -63,6 +66,7 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
 
     if (m_highLimitSwitchEdgePos(highLimitSwitch)) {
         m_highLimitSwitchPositionMeasured = getCurrentPosition();
+        m_positionSetPoint = std::min(m_positionSetPoint, (int32_t)m_length);
         m_stepper.resetSteps();
         m_stepper.step(m_positionSetPoint - m_length);
     }
