@@ -270,7 +270,7 @@ def parseStateReply(response):
     data = response["data"]
     pi.btnEStop = bool(data[0])
     pi.btnStart = bool(data[1])
-    pi.limitSwitches = [(data[2] >> i) & 1 for i in range(6)]
+    pi.limitSwitches = [(data[2] >> i) & 1 for i in range(8)]
     pi.vacuumOn = bool(data[3])
     pi.xPositionSteps = (data[ 4] << 24) | (data[ 5] << 16) | (data[ 6] << 8) | data[ 7]
     pi.yPositionSteps = (data[ 8] << 24) | (data[ 9] << 16) | (data[10] << 8) | data[11]
@@ -301,9 +301,27 @@ if __name__ == "__main__":
 
     cu = ControlUnit()
     cu.startCommunication()
-    cu.setEnableVacuum(True)
-
+    cu.setEnableVacuum(False)
+    cu.setXTarget(2000)
+    while not (cu.getProcessImage().xPositionSteps == 2000): pass
+    cu.setYTarget(2000)
+    while not (cu.getProcessImage().yPositionSteps == 2000): pass
+    cu.setXTarget(0)
+    while not (cu.getProcessImage().xPositionSteps == 0): pass
+    cu.setYTarget(0)
+    while not (cu.getProcessImage().yPositionSteps == 0): pass
+    cu.setYTarget(2000)
+    cu.setXTarget(2000)
+    while not (cu.getProcessImage().yPositionSteps == 2000): pass
+    while not (cu.getProcessImage().xPositionSteps == 2000): pass
+    cu.setYTarget(0)
+    cu.setXTarget(0)
+    while not (cu.getProcessImage().yPositionSteps == 0): pass
+    while not (cu.getProcessImage().xPositionSteps == 0): pass
+    cu.shootConfetti()
+    print(cu.getProcessImage().limitSwitches)
     cu.stopCommunication()
+    
 
     cu.join()
 

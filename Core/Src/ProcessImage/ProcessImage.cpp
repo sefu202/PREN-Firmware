@@ -14,8 +14,8 @@
 namespace ProcessImage {
 
 
-ProcessImage::ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis) 
-  : m_xAxis(xAxis), m_yAxis(yAxis), m_zAxis(zAxis) {
+ProcessImage::ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin ) 
+  : m_xAxis(xAxis), m_yAxis(yAxis), m_zAxis(zAxis), m_zAxisTwin(zAxisTwin) {
 
 }
 

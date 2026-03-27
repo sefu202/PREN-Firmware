@@ -19,7 +19,7 @@ namespace ProcessImage {
 class ProcessImage : public IProcessImage{
 public:
 
-    ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis);
+    ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin);
 
     bool setXTarget(uint32_t) override;
     uint32_t getXTarget() override;
@@ -54,7 +54,7 @@ public:
 
 private:
 
-    LinearAxis &m_xAxis, &m_yAxis, &m_zAxis;
+    LinearAxis &m_xAxis, &m_yAxis, &m_zAxis, &m_zAxisTwin;
 
     uint32_t m_xTarget = 0;
     

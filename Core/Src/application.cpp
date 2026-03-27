@@ -12,6 +12,7 @@
 #include "Util/Debounce.hpp"
 #include "Actuators/Vacuum.hpp"
 #include "Actuators/ConfettiCannon.hpp"
+#include "Util/SoftPWM.hpp"
 
 using namespace Stepper;
 
@@ -90,23 +91,25 @@ extern "C" int application(void){
     HAL_GPIO_WritePin(STEP2_M0_GPIO_Port, STEP2_M0_Pin, GPIO_PIN_SET);  // half step
     HAL_GPIO_WritePin(STEP2_M1_GPIO_Port, STEP2_M1_Pin, GPIO_PIN_SET);
 
-    HAL_GPIO_WritePin(STEP3_M0_GPIO_Port, STEP3_M0_Pin, GPIO_PIN_RESET);  // half step
+    HAL_GPIO_WritePin(STEP3_M0_GPIO_Port, STEP3_M0_Pin, GPIO_PIN_SET);  // half step
     HAL_GPIO_WritePin(STEP3_M1_GPIO_Port, STEP3_M1_Pin, GPIO_PIN_SET);
 
-    HAL_GPIO_WritePin(STEP4_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_RESET);  // half step
+    HAL_GPIO_WritePin(STEP4_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_SET);  // half step
     HAL_GPIO_WritePin(STEP4_M1_GPIO_Port, STEP4_M1_Pin, GPIO_PIN_SET);
 
-    LinearAxis xAxis        (step1, 50, 1250, 350, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis yAxis        (step2, 50, 1250, 50, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxis        (step3, 50, 50, 50, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxisTwin    (step4, 50, 50, 50, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis xAxis        (step1, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis yAxis        (step2, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxis        (step3, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxisTwin    (step4, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
     xAxis.init();
-    //yAxis.init();
+    yAxis.init();
     //zAxis.init();
+    //zAxisTwin.init();
+
 
 
     // Process Image
-    ProcessImage::ProcessImage processImage(xAxis, yAxis, zAxis);
+    ProcessImage::ProcessImage processImage(xAxis, yAxis, zAxis, zAxisTwin);
     
     // Communication
     Comm::ProtocolServer server(36769, processImage);
@@ -123,6 +126,23 @@ extern "C" int application(void){
     // Confetti Cannon Subsystem
     ConfettiCannon cannon;
 
+    // RGB
+    SoftPWM::PinConfig ledRedConfig = {
+        .gpio = nullptr,
+        .pin = 0
+    };
+    SoftPWM::PinConfig ledGreenConfig = {
+        .gpio = nullptr,
+        .pin = 0
+    };
+    SoftPWM::PinConfig ledBlueConfig = {
+        .gpio = nullptr,
+        .pin = 0
+    };
+    SoftPWM ledRed(ledRedConfig);
+    SoftPWM ledGreen(ledGreenConfig);
+    SoftPWM ledBlue(ledBlueConfig);
+
     while(1) {
 
         MX_LWIP_Process();
@@ -133,15 +153,17 @@ extern "C" int application(void){
         const bool estop = DI[1] || DI[0];  // ESTOP or Nucleo User Button
         processImage.setEstop(estop);
 
-        limSw[0](!DI[3]);
-        limSw[1](!DI[4]);
-        limSw[2](!DI[5]);
-        limSw[3](!DI[6]);
-        limSw[4](!DI[7]);
-        limSw[5](!DI[8]);
+        limSw[0](!DI[ 3]);
+        limSw[1](!DI[ 4]);
+        limSw[2](!DI[ 5]);
+        limSw[3](!DI[ 6]);
+        limSw[4](!DI[ 7]);
+        limSw[5](!DI[ 8]);
+        limSw[6](!DI[ 9]);
+        limSw[7](!DI[10]);
 
         uint8_t limSwBF = 0;
-        for (uint8_t i = 0; i < 6; i++) {
+        for (uint8_t i = 0; i < 8; i++) {
             limSwBF |= (limSw[i] << i);
         }
 
@@ -160,8 +182,8 @@ extern "C" int application(void){
             zAxis.estop();
             zAxisTwin.estop();
         }
-        HAL_GPIO_WritePin(STEP1_ENABLE_GPIO_Port, STEP1_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
-        HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        HAL_GPIO_WritePin(STEP1_ENABLE_GPIO_Port, STEP1_ENABLE_Pin, true ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, true ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP3_ENABLE_GPIO_Port, STEP3_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP4_ENABLE_GPIO_Port, STEP4_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         //HAL_GPIO_WritePin(STEP5_ENABLE_GPIO_Port, STEP5_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
@@ -170,19 +192,25 @@ extern "C" int application(void){
         eStopReleasedEdge(!estop);
         if (eStopReleasedEdge) {
             //xAxis.init();
-           // yAxis.init();
+            //yAxis.init();
+            zAxis.init();
+            zAxisTwin.init();
         }
 
         // Vacuum System
         vacuum.update(processImage.getVacuum(), estop);
         cannon.update(processImage.getShootConfetti(), estop);
 
-
+        // RGB LED
+        ledRed.set(processImage.getLed().r);
+        ledGreen.set(processImage.getLed().g);
+        ledBlue.set(processImage.getLed().b);
 
 
         DO[1] = vacuum.oRunPump();   // Vacuum Pump
         DO[2] = vacuum.oEnableValve();   // Valve
         DO[5] = cannon.oIgnite(); // confetti cannon
+
 
         writeDO(DO);
 
