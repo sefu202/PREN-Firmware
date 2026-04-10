@@ -4,7 +4,9 @@ cmake/
 Drivers/
 LWIP/
 startup_stm32f746xx.s
+startup_stm32f756xx.s
 STM32F746XX_FLASH.ld
+STM32F756XX_FLASH.ld
 
 
 Core/Inc/gpio.h
