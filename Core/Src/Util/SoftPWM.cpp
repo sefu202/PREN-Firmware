@@ -44,7 +44,7 @@ volatile uint32_t SoftPWM::s_setPoint[MAX_NUM_PWM_PINS];
 void SoftPWM::ISR() {
     for (uint8_t i = 0; i < MAX_NUM_PWM_PINS; i++) {
         if (s_pwmPinConfig[i].gpio != nullptr) { // pwm pin is configured
-            if (s_count > s_setPoint[i]) {
+            if (s_count >= s_setPoint[i]) {
                 HAL_GPIO_WritePin(s_pwmPinConfig[i].gpio, s_pwmPinConfig[i].pin, GPIO_PIN_RESET);
             }
             else {

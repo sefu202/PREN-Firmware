@@ -301,11 +301,12 @@ if __name__ == "__main__":
 
     cu = ControlUnit()
     cu.startCommunication()
+    cu.setLed(255,255,255)
     cu.setEnableVacuum(False)
-    cu.setXTarget(2000)
-    while not (cu.getProcessImage().xPositionSteps == 2000): pass
-    cu.setYTarget(2000)
-    while not (cu.getProcessImage().yPositionSteps == 2000): pass
+    cu.setXTarget(3000)
+    while not (cu.getProcessImage().xPositionSteps == 3000): pass
+    cu.setYTarget(3000)
+    while not (cu.getProcessImage().yPositionSteps == 3000): pass
     cu.setXTarget(0)
     while not (cu.getProcessImage().xPositionSteps == 0): pass
     cu.setYTarget(0)

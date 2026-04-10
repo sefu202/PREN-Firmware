@@ -2,5 +2,5 @@
 #pragma once
 
 struct RGB {
-    uint8_t r, g, b;
+    uint8_t r = 0, g = 0, b = 0;
 };
