@@ -14,7 +14,7 @@
 
 SoftPWM::SoftPWM(PinConfig pinConfig) {
     assert(pinConfig.gpio != nullptr);
-    assert(pinConfig.pin < 32);
+    assert(pinConfig.pin <= GPIO_PIN_MASK);
 
     uint8_t i = 0; 
     for (i = 0; i < MAX_NUM_PWM_PINS; i++) {

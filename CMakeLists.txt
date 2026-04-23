@@ -44,8 +44,6 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 file(GLOB_RECURSE USR_SOURCES
     "Core/Src/*.cpp"
-    "Core/Src/Comm/*.cpp"
-    "Core/Src/Stepper/*.cpp"
 )
 
 # Add sources to executable

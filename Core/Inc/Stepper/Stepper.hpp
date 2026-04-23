@@ -13,7 +13,7 @@
 #include <cstdint>
 #include "stm32f7xx_hal.h"
 
-#define MAX_NUM_STEPPERS 10
+#define MAX_NUM_STEPPERS 6
 #define STEPPER_IRQ TIM8_BRK_TIM12_IRQn
 #define STEPPER_IRQ_TICKRATE 40000  // [hz] set accoring to configuration
 #define STEPPER_MAX_SPEED STEPPER_IRQ_TICKRATE / STEPPER_MIN_TICKS_BETWEEN_STEP

@@ -48,7 +48,7 @@ void StepperMusicPlayer::play() {
 
     m_step.resetSteps();
     m_step.step(UINT32_MAX/10);
-    for (uint16_t i = 0; i < notes; i++) {
+    for (uint16_t i = 0; i < notes-1; i++) {
         m_step.setSpeed(speed[i]);
         HAL_Delay(duration[i]);
     }

@@ -44,6 +44,7 @@ uint32_t LinearAxis::getCurrentPosition() const {
 }
 
 void LinearAxis::init() {
+    m_stepper.resetSteps();
     m_stepper.step(INT32_MIN);
     m_positionSetPoint = 0;
 }

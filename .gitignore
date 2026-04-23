@@ -1,6 +1,6 @@
 build/*
 Middlewares/
-cmake/
+#cmake/
 Drivers/
 LWIP/
 startup_stm32f746xx.s
@@ -19,3 +19,5 @@ Core/Src/stm32f7xx_it.c
 Core/Src/syscalls.c
 Core/Src/sysmem.c
 Core/Src/system_stm32f7xx.c
+cmake/*
+!cmake/gcc-arm-none-eabi.cmake

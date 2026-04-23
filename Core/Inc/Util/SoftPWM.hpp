@@ -15,7 +15,7 @@
 #include "main.h"
 
 
-#define MAX_NUM_PWM_PINS 4
+#define MAX_NUM_PWM_PINS 6
 #define PWM_IRQ TIM8_BRK_TIM12_IRQn
 #define PWM_PERIOD 256
 

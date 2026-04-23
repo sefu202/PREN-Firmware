@@ -27,10 +27,10 @@ void readDI(std::array<bool, 13>& DI) {
     DI[ 6] = !(HAL_GPIO_ReadPin(DI6_GPIO_Port, DI6_Pin) == GPIO_PIN_SET ? true : false);
     DI[ 7] = !(HAL_GPIO_ReadPin(DI7_GPIO_Port, DI7_Pin) == GPIO_PIN_SET ? true : false);
     DI[ 8] = !(HAL_GPIO_ReadPin(DI8_GPIO_Port, DI8_Pin) == GPIO_PIN_SET ? true : false);
-    /*DI[ 9] = !HAL_GPIO_ReadPin(DI9_GPIO_Port, DI9_Pin) == GPIO_PIN_SET ? true : false;
-    DI[10] = !HAL_GPIO_ReadPin(DI10_GPIO_Port, DI10_Pin) == GPIO_PIN_SET ? true : false;
-    DI[11] = !HAL_GPIO_ReadPin(DI11_GPIO_Port, DI11_Pin) == GPIO_PIN_SET ? true : false;
-    DI[12] = !HAL_GPIO_ReadPin(DI12_GPIO_Port, DI12_Pin) == GPIO_PIN_SET ? true : false;*/
+    DI[ 9] = !(HAL_GPIO_ReadPin(DI9_GPIO_Port, DI9_Pin) == GPIO_PIN_SET ? true : false);
+    DI[10] = !(HAL_GPIO_ReadPin(DI10_GPIO_Port, DI10_Pin) == GPIO_PIN_SET ? true : false);
+    DI[11] = !(HAL_GPIO_ReadPin(DI11_GPIO_Port, DI11_Pin) == GPIO_PIN_SET ? true : false);
+    DI[12] = !(HAL_GPIO_ReadPin(DI12_GPIO_Port, DI12_Pin) == GPIO_PIN_SET ? true : false);
 }
 
 void writeDO(const std::array<bool, 13>& DO) {
@@ -43,10 +43,11 @@ void writeDO(const std::array<bool, 13>& DO) {
     HAL_GPIO_WritePin( DO6_GPIO_Port,  DO6_Pin, DO[ 6] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin( DO7_GPIO_Port,  DO7_Pin, DO[ 7] ? GPIO_PIN_SET : GPIO_PIN_RESET);*/
     HAL_GPIO_WritePin( DO8_GPIO_Port,  DO8_Pin, DO[ 8] ? GPIO_PIN_SET : GPIO_PIN_RESET); 
+    /* Written by PWM */
     /*HAL_GPIO_WritePin( DO9_GPIO_Port,  DO9_Pin, DO[ 9] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(DO10_GPIO_Port, DO10_Pin, DO[10] ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(DO11_GPIO_Port, DO11_Pin, DO[11] ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    //HAL_GPIO_WritePin(DO12_GPIO_Port, DO12_Pin, DO[12] ? GPIO_PIN_SET : GPIO_PIN_RESET); */ 
+    HAL_GPIO_WritePin(DO11_GPIO_Port, DO11_Pin, DO[11] ? GPIO_PIN_SET : GPIO_PIN_RESET); */ 
+    HAL_GPIO_WritePin(DO12_GPIO_Port, DO12_Pin, DO[12] ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
 extern "C" int application(void){
@@ -84,6 +85,14 @@ extern "C" int application(void){
     step4PinConfig.dirPin = STEP4_DIR_Pin;
     Stepper::Stepper step4(step4PinConfig);
 
+    // C-Axis (Stepper 5)
+    Stepper::Stepper::PinConfig step5PinConfig;
+    step5PinConfig.stepGpio = STEP5_STEP_GPIO_Port;
+    step5PinConfig.stepPin = STEP5_STEP_Pin;
+    step5PinConfig.dirGpio = STEP5_DIR_GPIO_Port;
+    step5PinConfig.dirPin = STEP5_DIR_Pin;
+    Stepper::Stepper step5(step5PinConfig);
+
 
     // Set stepper modes
     HAL_GPIO_WritePin(STEP1_M0_GPIO_Port, STEP1_M0_Pin, GPIO_PIN_SET);  // 1/4 step
@@ -98,8 +107,11 @@ extern "C" int application(void){
     HAL_GPIO_WritePin(STEP4_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_SET);  // 1/4 step
     HAL_GPIO_WritePin(STEP4_M1_GPIO_Port, STEP4_M1_Pin, GPIO_PIN_SET);
 
-    LinearAxis xAxis        (step1, 50, 5000, 250, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis yAxis        (step2, 50, 5000, 250, 1000000);  // a, maxSpeed, initSpeed, length
+    HAL_GPIO_WritePin(STEP5_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_SET);  // 1/4 step
+    HAL_GPIO_WritePin(STEP5_M1_GPIO_Port, STEP4_M1_Pin, GPIO_PIN_SET);
+
+    LinearAxis xAxis        (step1, 50, 5000, 250,   10000);  // a, maxSpeed, initSpeed, length
+    LinearAxis yAxis        (step2, 50, 5000, 250,   10000);  // a, maxSpeed, initSpeed, length
     LinearAxis zAxis        (step3, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
     LinearAxis zAxisTwin    (step4, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
     xAxis.init();
@@ -117,9 +129,8 @@ extern "C" int application(void){
 
     std::array<bool,13> DI; // DI[0] is user button on nucleo!
     std::array<bool,13> DO; // DO[0] unused!
-    std::array<Debounce, 6> limSw;
+    std::array<Debounce, 8> limSw;
     EdgePos eStopReleasedEdge;
-
 
     // Vacuum Subsystem
     Vacuum vacuum;
@@ -140,9 +151,26 @@ extern "C" int application(void){
         .gpio = DO7_GPIO_Port,
         .pin = DO7_Pin
     };
+    SoftPWM::PinConfig ledRedConfig2 = {
+        .gpio = DO9_GPIO_Port,
+        .pin = DO9_Pin
+    };
+    SoftPWM::PinConfig ledGreenConfig2 = {
+        .gpio = DO10_GPIO_Port,
+        .pin = DO10_Pin
+    };
+    SoftPWM::PinConfig ledBlueConfig2 = {
+        .gpio = DO11_GPIO_Port,
+        .pin = DO11_Pin
+    };
     SoftPWM ledRed(ledRedConfig);
     SoftPWM ledGreen(ledGreenConfig);
     SoftPWM ledBlue(ledBlueConfig);
+    SoftPWM ledRed2(ledRedConfig2);
+    SoftPWM ledGreen2(ledGreenConfig2);
+    SoftPWM ledBlue2(ledBlueConfig2);
+
+    HAL_Delay(500);
 
     while(1) {
 
@@ -187,7 +215,7 @@ extern "C" int application(void){
         HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP3_ENABLE_GPIO_Port, STEP3_ENABLE_Pin, true ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP4_ENABLE_GPIO_Port, STEP4_ENABLE_Pin, true ? GPIO_PIN_RESET : GPIO_PIN_SET);
-        //HAL_GPIO_WritePin(STEP5_ENABLE_GPIO_Port, STEP5_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        HAL_GPIO_WritePin(STEP5_ENABLE_GPIO_Port, STEP5_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
 
         // Initialize after E-Stop
         eStopReleasedEdge(!estop);
@@ -206,6 +234,9 @@ extern "C" int application(void){
         ledRed.set(processImage.getLed().r);
         ledGreen.set(processImage.getLed().g);
         ledBlue.set(processImage.getLed().b);
+        ledRed2.set(processImage.getLed().r);
+        ledGreen2.set(processImage.getLed().g);
+        ledBlue2.set(processImage.getLed().b);
 
 
         DO[1] = vacuum.oRunPump();   // Vacuum Pump
@@ -214,6 +245,9 @@ extern "C" int application(void){
         // DO[5] = red
         //DO[6] = green
         //DO[7] = blue
+        // DO[9] = red2
+        //DO[10] = green2
+        //DO[11] = blue2
 
 
         writeDO(DO);
