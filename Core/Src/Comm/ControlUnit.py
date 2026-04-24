@@ -301,7 +301,7 @@ if __name__ == "__main__":
 
     cu = ControlUnit()
     cu.startCommunication()
-    cu.setLed(255,255,255)
+    """cu.setLed(255,255,255)
     cu.setEnableVacuum(False)
     cu.setXTarget(3000)
     while not (cu.getProcessImage().xPositionSteps == 3000): pass
@@ -320,7 +320,10 @@ if __name__ == "__main__":
     while not (cu.getProcessImage().yPositionSteps == 0): pass
     while not (cu.getProcessImage().xPositionSteps == 0): pass
     cu.shootConfetti()
-    print(cu.getProcessImage().limitSwitches)
+    print(cu.getProcessImage().limitSwitches)"""
+
+    cu.setLed(0,0,0)
+    print(cu.getProcessImage().isInitialized)
     cu.stopCommunication()
     
 

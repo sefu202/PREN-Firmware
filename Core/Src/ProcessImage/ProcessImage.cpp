@@ -10,13 +10,14 @@
  */
 
  #include "ProcessImage/ProcessImage.hpp"
+ #include <cassert>
 
 namespace ProcessImage {
 
 
-ProcessImage::ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin ) 
-  : m_xAxis(xAxis), m_yAxis(yAxis), m_zAxis(zAxis), m_zAxisTwin(zAxisTwin) {
-
+ProcessImage::ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin, Stepper::Stepper& cAxis ) 
+  : m_xAxis(xAxis), m_yAxis(yAxis), m_zAxis(zAxis), m_zAxisTwin(zAxisTwin) , m_cAxis(cAxis){
+    assert(m_zAxis.getLength() == m_zAxisTwin.getLength());
 }
 
 bool ProcessImage::setXTarget(uint32_t target) {
@@ -53,6 +54,7 @@ bool ProcessImage::setZTarget(uint32_t target) {
     }
 
     m_zAxis.moveTo(target);
+    m_zAxisTwin.moveTo(target);
     return true;
 }
 
@@ -70,8 +72,13 @@ bool ProcessImage::getVacuum() {
     return m_vacuum;
 }
 
-bool ProcessImage::setRot(int32_t) {
-    return false;
+bool ProcessImage::setRot(int32_t rot) {
+    m_cAxis.setSpeed(0);
+    int32_t currentPosition = m_rotSetPoint - m_cAxis.getRemainingSteps();
+    m_rotSetPoint = rot;
+    m_cAxis.step(m_rotSetPoint - currentPosition);
+    m_cAxis.setSpeed(5000);
+    return true;
 }
 
 uint32_t ProcessImage::getRotDelta() {
@@ -148,12 +155,11 @@ uint32_t ProcessImage::getZPosition() {
 }
 
 int32_t ProcessImage::getRotPosition() {
-    // todo
-    return 0;
+    return m_rotSetPoint - m_cAxis.getRemainingSteps();
 }
 
 bool ProcessImage::isInitialized() { 
-    return m_xAxis.isInitialized() && m_yAxis.isInitialized() && m_zAxis.isInitialized();
+    return m_xAxis.isInitialized() && m_yAxis.isInitialized() && m_zAxis.isInitialized() && m_zAxisTwin.isInitialized();
 }
 
 }

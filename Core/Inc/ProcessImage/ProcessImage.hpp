@@ -13,13 +13,14 @@
 
 #include "IProcessImage.hpp"
 #include "LinearAxis/LinearAxis.hpp"
+#include "Stepper/Stepper.hpp"
 
 namespace ProcessImage {
 
 class ProcessImage : public IProcessImage{
 public:
 
-    ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin);
+    ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin, Stepper::Stepper& cAxis);
 
     bool setXTarget(uint32_t) override;
     uint32_t getXTarget() override;
@@ -55,12 +56,13 @@ public:
 private:
 
     LinearAxis &m_xAxis, &m_yAxis, &m_zAxis, &m_zAxisTwin;
-
-    uint32_t m_xTarget = 0;
+    Stepper::Stepper &m_cAxis;
     
     bool m_shootConfetti = false, m_vacuum = false, m_estop = false, m_startButton = false;
     uint8_t m_limSw = 0;
     RGB m_led;
+
+    int32_t m_rotSetPoint = 0;
 };
 
 

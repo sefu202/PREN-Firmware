@@ -107,8 +107,11 @@ extern "C" int application(void){
     HAL_GPIO_WritePin(STEP4_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_SET);  // 1/4 step
     HAL_GPIO_WritePin(STEP4_M1_GPIO_Port, STEP4_M1_Pin, GPIO_PIN_SET);
 
-    HAL_GPIO_WritePin(STEP5_M0_GPIO_Port, STEP4_M0_Pin, GPIO_PIN_SET);  // 1/4 step
-    HAL_GPIO_WritePin(STEP5_M1_GPIO_Port, STEP4_M1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(STEP5_M0_GPIO_Port, STEP5_M0_Pin, GPIO_PIN_SET);  // 1/16 step
+    HAL_GPIO_WritePin(STEP5_M1_GPIO_Port, STEP5_M1_Pin, GPIO_PIN_RESET);
+
+    // m0 set, m1 reset: 200 steps / r
+    // m0 reset, m1 set: 400 steps / r
 
     LinearAxis xAxis        (step1, 50, 5000, 250,   10000);  // a, maxSpeed, initSpeed, length
     LinearAxis yAxis        (step2, 50, 5000, 250,   10000);  // a, maxSpeed, initSpeed, length
@@ -119,10 +122,13 @@ extern "C" int application(void){
     zAxis.init();
     zAxisTwin.init();
 
+    Stepper::Stepper& cAxis = step5;
+    cAxis.setSpeed(5000);
+
 
 
     // Process Image
-    ProcessImage::ProcessImage processImage(xAxis, yAxis, zAxis, zAxisTwin);
+    ProcessImage::ProcessImage processImage(xAxis, yAxis, zAxis, zAxisTwin, cAxis);
     
     // Communication
     Comm::ProtocolServer server(36769, processImage);
@@ -131,6 +137,7 @@ extern "C" int application(void){
     std::array<bool,13> DO; // DO[0] unused!
     std::array<Debounce, 8> limSw;
     EdgePos eStopReleasedEdge;
+    Debounce btnStart;
 
     // Vacuum Subsystem
     Vacuum vacuum;
@@ -182,6 +189,9 @@ extern "C" int application(void){
         const bool estop = !DI[1] || DI[0];  // ESTOP or Nucleo User Button
         processImage.setEstop(estop);
 
+        btnStart(DI[2]);
+        processImage.setStartButton(btnStart);
+
         limSw[0](!DI[ 3]);
         limSw[1](!DI[ 4]);
         limSw[2](!DI[ 5]);
@@ -197,7 +207,6 @@ extern "C" int application(void){
         }
 
         processImage.setLimitSwitches(limSwBF);
-        processImage.setStartButton(false);
 
         xAxis.update(limSw[0], limSw[1]);
         yAxis.update(limSw[2], limSw[3]);

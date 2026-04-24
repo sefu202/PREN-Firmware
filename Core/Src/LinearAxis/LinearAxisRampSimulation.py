@@ -6,9 +6,9 @@ UINT16_MAX = 65535
 # ------------------------
 # Parameters (adjustable)
 # ------------------------
-m_a = 1                 # acceleration (speed units per ms)
-m_maxSpeed = 1250
-m_distance = 500      # arbitrary distance units
+m_a = 50                 # acceleration (speed units per ms)
+m_maxSpeed = 5000
+m_distance = 2000      # arbitrary distance units
 sim_time_ms = 10000      # simulation length
 dt_ms = 1               # timestep
 
