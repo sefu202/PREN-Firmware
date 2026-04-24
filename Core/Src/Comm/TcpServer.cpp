@@ -171,6 +171,7 @@ err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         thisFromArg(arg)->m_receivedBytes = p->len;
     }
     else {
+        assert(0);
         // todo this would lead to data loss
     }
 

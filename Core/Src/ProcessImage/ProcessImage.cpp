@@ -29,10 +29,6 @@ bool ProcessImage::setXTarget(uint32_t target) {
     return true;
 }
 
-uint32_t ProcessImage::getXTarget() {
-    // todo remove
-    return 0;
-}
 
 bool ProcessImage::setYTarget(uint32_t target) {
     if (target > m_yAxis.getLength()) {
@@ -43,10 +39,6 @@ bool ProcessImage::setYTarget(uint32_t target) {
     return true;
 }
 
-uint32_t ProcessImage::getYTarget() {
-    // todo remove
-    return 0;
-}
 
 bool ProcessImage::setZTarget(uint32_t target) {
     if (target > m_zAxis.getLength()) {
@@ -58,10 +50,7 @@ bool ProcessImage::setZTarget(uint32_t target) {
     return true;
 }
 
-uint32_t ProcessImage::getZTarget() {
-    // todo remove
-    return 0;
-}
+
 
 bool ProcessImage::setVacuum(bool vacuum) {
     m_vacuum = vacuum;
@@ -81,10 +70,6 @@ bool ProcessImage::setRot(int32_t rot) {
     return true;
 }
 
-uint32_t ProcessImage::getRotDelta() {
-    // todo
-    return 0;
-}
 
 bool ProcessImage::setShootConfetti(bool shootConfetti) {
     m_shootConfetti = shootConfetti;

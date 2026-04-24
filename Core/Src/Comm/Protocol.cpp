@@ -25,7 +25,6 @@ void Protocol::appendData(const uint8_t *data, uint8_t len) {
     }
     else {
         assert(0); // not good
-        // todo
     }
 }
 
@@ -35,7 +34,6 @@ void Protocol::appendByte(const uint8_t byte) {
     }
     else {
         assert(0);
-        // todo
     }
 }
 

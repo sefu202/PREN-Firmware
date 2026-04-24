@@ -173,7 +173,6 @@ uint32_t ProtocolServer::processSetTargetProtocol(const Protocol& recvdProtocol)
     }
     else {
         ret = UINT32_MAX;
-        // todo report incorrect protocol length, preferably on a superiour software layer
     }
     return ret;
 }

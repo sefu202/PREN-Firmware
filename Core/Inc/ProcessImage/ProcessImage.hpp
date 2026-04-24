@@ -23,15 +23,11 @@ public:
     ProcessImage(LinearAxis& xAxis, LinearAxis& yAxis, LinearAxis& zAxis, LinearAxis& zAxisTwin, Stepper::Stepper& cAxis);
 
     bool setXTarget(uint32_t) override;
-    uint32_t getXTarget() override;
     bool setYTarget(uint32_t) override;
-    uint32_t getYTarget() override;
     bool setZTarget(uint32_t) override;
-    uint32_t getZTarget() override;
     bool setVacuum(bool) override;
     bool getVacuum() override;
     bool setRot(int32_t) override;
-    uint32_t getRotDelta() override;
     bool setShootConfetti(bool) override;
     bool getShootConfetti() override;
     bool setLed(RGB rgb) override;

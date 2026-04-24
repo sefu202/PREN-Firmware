@@ -18,15 +18,11 @@ namespace ProcessImage {
 class IProcessImage{
 public:
     virtual bool setXTarget(uint32_t) = 0;
-    virtual uint32_t getXTarget() = 0;
     virtual bool setYTarget(uint32_t) = 0;
-    virtual uint32_t getYTarget() = 0;
     virtual bool setZTarget(uint32_t) = 0;
-    virtual uint32_t getZTarget() = 0;
     virtual bool setVacuum(bool) = 0;
     virtual bool getVacuum() = 0;
     virtual bool setRot(int32_t) = 0;
-    virtual uint32_t getRotDelta() = 0;
     virtual bool setShootConfetti(bool) = 0;
     virtual bool getShootConfetti() = 0;
     virtual bool setLed(RGB rgb) = 0;
