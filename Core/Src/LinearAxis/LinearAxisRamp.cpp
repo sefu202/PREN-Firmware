@@ -17,6 +17,10 @@ LinearAxisRamp::LinearAxisRamp(uint16_t a, uint16_t maxSpeed) : m_a(a), m_maxSpe
     reset();
 }
 
+void LinearAxisRamp::setMaxSpeed(uint16_t maxSpeed) {
+    m_maxSpeed = maxSpeed;
+}
+
 uint16_t LinearAxisRamp::getSpeed(uint32_t distance) {
     uint16_t speedPos = posRampSpeed();
     uint16_t speedNeg = negRampSpeed(distance);

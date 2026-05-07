@@ -339,9 +339,41 @@ if __name__ == "__main__":
     """
     
 
+    cu.setLed(0,0,0)
 
-    cu.setLed(255,255,255)
     print(cu.getProcessImage().isInitialized)
+
+    stepnWaitXY(cu, 3471, 892)
+
+    stepnWaitXY(cu, 128, 3764)
+    stepnWaitXY(cu, 3999, 2145)
+    stepnWaitXY(cu, 2450, 67)
+    stepnWaitXY(cu, 1783, 3201)
+    stepnWaitXY(cu, 860, 1459)
+    stepnWaitXY(cu, 3012, 4000)
+    stepnWaitXY(cu, 412, 2788)
+    stepnWaitXY(cu, 2234, 991)
+    stepnWaitXY(cu, 3901, 1560)
+    stepnWaitXY(cu, 1543, 2876)
+    stepnWaitXY(cu, 2890, 1024)
+    stepnWaitXY(cu, 67, 1998)
+    stepnWaitXY(cu, 4000, 3777)
+    stepnWaitXY(cu, 2211, 345)
+    stepnWaitXY(cu, 980, 410)
+    stepnWaitXY(cu, 3125, 2601)
+    stepnWaitXY(cu, 176, 3890)
+    stepnWaitXY(cu, 2684, 1765)
+    stepnWaitXY(cu, 1345, 1333)
+    stepnWaitXY(cu, 3778, 2902)
+    stepnWaitXY(cu, 1999, 2500)
+    stepnWaitXY(cu, 845, 3678)
+    stepnWaitXY(cu, 3022, 58)
+    stepnWaitXY(cu, 410, 2144)
+    stepnWaitXY(cu, 2501, 3999)
+    stepnWaitXY(cu, 3333, 1444)
+    stepnWaitXY(cu, 109, 3200)
+    stepnWaitXY(cu, 2877, 1988)
+    stepnWaitXY(cu, 3900, 765)
     cu.stopCommunication()
     
 

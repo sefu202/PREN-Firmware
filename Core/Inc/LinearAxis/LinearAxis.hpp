@@ -14,6 +14,7 @@
 #include "Stepper/Stepper.hpp"
 #include "LinearAxis/LinearAxisRamp.hpp"
 #include "Util/EdgePos.hpp"
+#include "LinearAxis/MotionTimer.hpp"
 
 
 class LinearAxis {
@@ -28,6 +29,10 @@ public:
      * @param length length of the linear axis in steps
      */
     LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpeed, uint16_t initSpeed, uint32_t length);
+
+    void setMotionTimerPartner(MotionTimer* partner);
+
+    MotionTimer* getMotionTimer();
 
     /**
      * @brief Sets position to move to
@@ -88,6 +93,8 @@ private:
     uint32_t m_highLimitSwitchPositionMeasured = 0; // measured position of high limit switch, set when high limit switch gets touched
     uint32_t m_length;
     EdgePos m_lowLimitSwitchEdgePos, m_highLimitSwitchEdgePos;
+    MotionTimer m_motionTimer;
+    MotionTimer *m_motionTimerPartner = nullptr;
 };
 
 

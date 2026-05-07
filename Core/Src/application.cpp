@@ -117,6 +117,8 @@ extern "C" int application(void){
     LinearAxis yAxis        (step2, 200, 5000, 1000,   10000);  // a, maxSpeed, initSpeed, length
     LinearAxis zAxis        (step3, 200, 5000, 2500, 1000000);  // a, maxSpeed, initSpeed, length
     LinearAxis zAxisTwin    (step4, 200, 5000, 2500, 1000000);  // a, maxSpeed, initSpeed, length
+    xAxis.setMotionTimerPartner(yAxis.getMotionTimer());
+    yAxis.setMotionTimerPartner(xAxis.getMotionTimer());
     xAxis.init();
     yAxis.init();
     zAxis.init();

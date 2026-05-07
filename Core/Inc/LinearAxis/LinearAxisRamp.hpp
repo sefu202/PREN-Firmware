@@ -26,6 +26,12 @@ public:
     LinearAxisRamp(uint16_t a, uint16_t maxSpeed);
 
     /**
+     * @brief sets max speed
+     * @param maxSpeed max speed
+     */
+    void setMaxSpeed(uint16_t maxSpeed);
+
+    /**
      * @brief get speed for ramp
      * @param distance absolute distance to set point
      * 

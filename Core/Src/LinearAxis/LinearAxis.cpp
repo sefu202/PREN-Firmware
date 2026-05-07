@@ -20,8 +20,17 @@ LinearAxis::LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpe
     m_initSpeed(initSpeed),
     m_length(length), 
     m_lowLimitSwitchEdgePos(true),
-    m_highLimitSwitchEdgePos(true) {
+    m_highLimitSwitchEdgePos(true), 
+    m_motionTimer(maxA, maxSpeed) {
 
+}
+
+void LinearAxis::setMotionTimerPartner(MotionTimer* mtp) {
+    m_motionTimerPartner = mtp;
+}
+
+MotionTimer* LinearAxis::getMotionTimer() {
+    return &m_motionTimer;
 }
 
 void LinearAxis::moveTo(uint32_t setPoint) {
@@ -31,7 +40,15 @@ void LinearAxis::moveTo(uint32_t setPoint) {
         m_stepper.resetSteps();
         
         m_positionSetPoint = std::min(std::max(setPoint, 0ul), m_length);
-        m_stepper.step(m_positionSetPoint - positionCurrent);
+        int32_t d = m_positionSetPoint - positionCurrent;
+        m_stepper.step(d);
+
+        uint32_t tMin = m_motionTimer.tMin(std::abs(d));
+        m_ramp.setMaxSpeed(m_motionTimer.vReccomend(std::abs(d)));
+
+        if (m_motionTimerPartner != nullptr) {
+            m_motionTimerPartner->reccomendETATick(tMin + HAL_GetTick());
+        }
     }
 }
 
@@ -55,7 +72,14 @@ void LinearAxis::init() {
 
 void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
     if (m_initialized && !lowLimitSwitch && !highLimitSwitch) {
-        m_stepper.setSpeed(m_ramp.getSpeed(std::abs(m_stepper.getRemainingSteps())));
+
+        uint32_t d = std::abs(m_stepper.getRemainingSteps());
+
+        if (m_motionTimer.hasNewEtaTick() && d > 0) {
+            m_ramp.setMaxSpeed(m_motionTimer.vReccomend(d));
+        }
+
+        m_stepper.setSpeed(m_ramp.getSpeed(d));
     }
     else {
         m_stepper.setSpeed(m_initSpeed);
