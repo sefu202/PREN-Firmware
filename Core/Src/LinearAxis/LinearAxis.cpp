@@ -44,9 +44,11 @@ uint32_t LinearAxis::getCurrentPosition() const {
 }
 
 void LinearAxis::init() {
-    m_stepper.resetSteps();
-    m_stepper.step(INT32_MIN);
-    m_positionSetPoint = 0;
+    if (!m_initialized) {
+        m_stepper.resetSteps();
+        m_stepper.step(INT32_MIN);
+        m_positionSetPoint = 0;
+    }
 }
 
 void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
@@ -58,11 +60,16 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
         m_ramp.reset();
     }
 
+    if (lowLimitSwitch) {
+        m_initialized = true;
+        
+    }
+
     if (m_lowLimitSwitchEdgePos(lowLimitSwitch)) {
+        m_initialized = true;
         m_positionSetPoint = std::max(m_positionSetPoint, 0l);
         m_stepper.resetSteps();
         m_stepper.step(m_positionSetPoint);
-        m_initialized = true;
     }
 
     if (m_highLimitSwitchEdgePos(highLimitSwitch)) {

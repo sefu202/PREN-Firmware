@@ -3,66 +3,48 @@ import matplotlib.pyplot as plt
 
 UINT16_MAX = 65535
 
-# ------------------------
-# Parameters (adjustable)
-# ------------------------
-m_a = 50                 # acceleration (speed units per ms)
+# Parameters
+m_a = 50
 m_maxSpeed = 5000
-m_distance = 2000      # arbitrary distance units
-sim_time_ms = 10000      # simulation length
-dt_ms = 1               # timestep
+m_distance = 2000
+sim_time_ms = 10000
+dt_ms = 0.2
 
-# ------------------------
-# State variables
-# ------------------------
-time = []
-speed = []
-position = []
-acceleration = []
+t = np.arange(0, sim_time_ms, dt_ms)
+n = len(t)
 
-m_lastSpeed = 0
-m_lastTick = 0
-pos = 0
+speed = np.zeros(n)
+position = np.zeros(n)
+acceleration = np.zeros(n)
 
-# ------------------------
-# Helper functions
-# ------------------------
-def posRampSpeed(lastSpeed, a, dt):
-    # EXACT mirror of your code
-    return min(lastSpeed + a * dt, UINT16_MAX)
+m_lastSpeed = 0.0
+pos = 0.0
 
-def negRampSpeed(a, distance):
-    return np.sqrt(2 * a * 1000 * distance)
+for i in range(n):
+    remaining = m_distance - pos
 
-# ------------------------
-# Simulation loop
-# ------------------------
-oldPos = 0
-for t in range(0, sim_time_ms, dt_ms):
-    dt = dt_ms
+    speed_pos = min(m_lastSpeed + m_a * dt_ms, UINT16_MAX)
+    speed_neg = np.sqrt(2 * m_a * 1000 * np.abs(remaining)) * np.sign(remaining)
 
-    speedPos = posRampSpeed(m_lastSpeed, m_a, dt)
-    speedNeg = negRampSpeed(m_a, np.abs(m_distance - oldPos)) * np.sign(m_distance - oldPos)
+    v = min(speed_pos, speed_neg, m_maxSpeed)
 
-    v = min(speedPos, speedNeg, m_maxSpeed)
+    pos += v * dt_ms / 1000.0
 
-    # Integrate
-    pos += v * dt / 1000.0  # convert ms → s for position
-    oldPos = pos
-    a_inst = (v - m_lastSpeed) / dt if dt > 0 else 0
-
-    # Save
-    time.append(t / 1000.0)  # seconds
-    speed.append(v)
-    position.append(pos)
-    acceleration.append(a_inst)
-
-    # Update state
+    speed[i] = v
+    position[i] = pos
+    
     m_lastSpeed = v
-    m_lastTick += dt
 
     if pos >= m_distance:
+        speed = speed[:i+1]
+        position = position[:i+1]
+        acceleration = acceleration[:i+1]
+        t = t[:i+1]
         break
+
+
+acceleration[1:] = (speed[1:] - speed[:-1]) / dt_ms
+acceleration[0] = 0
 
 # ------------------------
 # Plotting
@@ -70,17 +52,17 @@ for t in range(0, sim_time_ms, dt_ms):
 plt.figure(figsize=(10, 8))
 
 plt.subplot(3, 1, 1)
-plt.plot(time, position)
+plt.plot(t, position)
 plt.ylabel("s(t) position")
 plt.grid(True)
 
 plt.subplot(3, 1, 2)
-plt.plot(time, speed)
+plt.plot(t, speed)
 plt.ylabel("v(t) speed")
 plt.grid(True)
 
 plt.subplot(3, 1, 3)
-plt.plot(time, acceleration)
+plt.plot(t, acceleration)
 plt.ylabel("a(t) acceleration")
 plt.xlabel("Time [s]")
 plt.grid(True)

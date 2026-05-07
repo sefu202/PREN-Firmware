@@ -113,10 +113,10 @@ extern "C" int application(void){
     // m0 set, m1 reset: 200 steps / r
     // m0 reset, m1 set: 400 steps / r
 
-    LinearAxis xAxis        (step1, 50, 5000, 250,   10000);  // a, maxSpeed, initSpeed, length
-    LinearAxis yAxis        (step2, 50, 5000, 250,   10000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxis        (step3, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxisTwin    (step4, 50, 1250, 250, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis xAxis        (step1, 200, 5000, 1000,   6766);  // a, maxSpeed, initSpeed, length
+    LinearAxis yAxis        (step2, 200, 5000, 1000,   10000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxis        (step3, 200, 5000, 2500, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxisTwin    (step4, 200, 5000, 2500, 1000000);  // a, maxSpeed, initSpeed, length
     xAxis.init();
     yAxis.init();
     zAxis.init();
@@ -180,6 +180,7 @@ extern "C" int application(void){
     HAL_Delay(500);
 
     while(1) {
+        HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_SET);
 
         MX_LWIP_Process();
 
@@ -210,7 +211,7 @@ extern "C" int application(void){
 
         xAxis.update(limSw[0], limSw[1]);
         yAxis.update(limSw[2], limSw[3]);
-        zAxis.update(limSw[4], limSw[5]);
+        zAxis.update(false, false);
         zAxisTwin.update(false,false);
 
         // Emergency Stop
@@ -222,8 +223,8 @@ extern "C" int application(void){
         }
         HAL_GPIO_WritePin(STEP1_ENABLE_GPIO_Port, STEP1_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
-        HAL_GPIO_WritePin(STEP3_ENABLE_GPIO_Port, STEP3_ENABLE_Pin, true ? GPIO_PIN_RESET : GPIO_PIN_SET);
-        HAL_GPIO_WritePin(STEP4_ENABLE_GPIO_Port, STEP4_ENABLE_Pin, true ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        HAL_GPIO_WritePin(STEP3_ENABLE_GPIO_Port, STEP3_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        HAL_GPIO_WritePin(STEP4_ENABLE_GPIO_Port, STEP4_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP5_ENABLE_GPIO_Port, STEP5_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
 
         // Initialize after E-Stop
@@ -262,6 +263,9 @@ extern "C" int application(void){
         writeDO(DO);
 
         processImage.update();
+
+        HAL_GPIO_WritePin(LED_RED_GPIO_Port, LED_RED_Pin, GPIO_PIN_RESET);
+        // HAL_Delay(10); // to measure cycle time
     }
     return 0;
 }

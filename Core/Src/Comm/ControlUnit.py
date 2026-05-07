@@ -16,6 +16,21 @@ PORT = 36769        # Server-Port
 POLLING_INTERVAL_MS = 50
 PEACE_WAR_SWITCH = "PEACE" # Set to WAR to enable confetti cannon
 
+
+def stepnWaintX(cu, target):
+    cu.setXTarget(target)
+    while not (cu.getProcessImage().xPositionSteps == target): pass
+
+def stepnWaintY(cu, target):
+    cu.setYTarget(target)
+    while not (cu.getProcessImage().yPositionSteps == target): pass
+
+def stepnWaitXY(cu, x,y):
+    cu.setXTarget(x)
+    cu.setYTarget(y)
+    while not (cu.getProcessImage().xPositionSteps == x): pass
+    while not (cu.getProcessImage().yPositionSteps == y): pass
+
 class ProcessImage:
     def __init__(self):
         self.btnEStop = True
@@ -320,12 +335,14 @@ if __name__ == "__main__":
     while not (cu.getProcessImage().yPositionSteps == 0): pass
     while not (cu.getProcessImage().xPositionSteps == 0): pass
     cu.shootConfetti()
-    print(cu.getProcessImage().limitSwitches)"""
+    print(cu.getProcessImage().limitSwitches)
+    """
+    
 
-    cu.setLed(0,0,0)
+
+    cu.setLed(255,255,255)
     print(cu.getProcessImage().isInitialized)
     cu.stopCommunication()
     
 
     cu.join()
-
