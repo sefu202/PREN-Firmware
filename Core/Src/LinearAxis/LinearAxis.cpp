@@ -18,7 +18,9 @@ LinearAxis::LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpe
   : m_stepper(stepper), 
     m_ramp(maxA, maxSpeed), 
     m_initSpeed(initSpeed),
-    m_length(length) {
+    m_length(length), 
+    m_lowLimitSwitchEdgePos(true),
+    m_highLimitSwitchEdgePos(true) {
 
 }
 
@@ -60,16 +62,25 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
         m_ramp.reset();
     }
 
-    if (lowLimitSwitch) {
-        m_initialized = true;
-        
-    }
 
     if (m_lowLimitSwitchEdgePos(lowLimitSwitch)) {
         m_initialized = true;
         m_positionSetPoint = std::max(m_positionSetPoint, 0l);
         m_stepper.resetSteps();
         m_stepper.step(m_positionSetPoint);
+    }
+
+    // Check if axis is already on limit switch at start:
+    // if yes (uncertain initialisation, position is ambigious) -> back of again and detect edge (certain position)
+    if (lowLimitSwitch && !m_initialized) {
+        m_uncertainInitialized = true;
+        m_stepper.resetSteps();
+        m_stepper.step(200);
+    }
+    else if (m_uncertainInitialized && !m_initialized) {
+        m_stepper.resetSteps();
+        m_stepper.step(INT32_MIN);
+        m_uncertainInitialized = false;
     }
 
     if (m_highLimitSwitchEdgePos(highLimitSwitch)) {

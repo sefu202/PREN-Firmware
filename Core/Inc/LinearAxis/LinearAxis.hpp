@@ -82,7 +82,7 @@ public:
 private:
     Stepper::Stepper& m_stepper;   // stepper motor reference
     LinearAxisRamp m_ramp;
-    bool m_initialized = false;
+    bool m_initialized = false, m_uncertainInitialized = false;
     int32_t m_positionSetPoint = 0;
     uint16_t m_initSpeed;
     uint32_t m_highLimitSwitchPositionMeasured = 0; // measured position of high limit switch, set when high limit switch gets touched

@@ -13,11 +13,18 @@
 #include "Util/EdgePos.hpp"
 
 bool EdgePos::operator()(bool current){
+    if (!initialized) {
+        prev = current;
+        initialized = true;
+    }
     rising = current && !prev;
     prev = current;
     return rising;
 }
 
+EdgePos::EdgePos(bool requireInit) {
+    initialized = !requireInit;
+}
 
 EdgePos::operator bool() const {
     return rising;
