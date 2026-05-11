@@ -190,9 +190,11 @@ int32_t ProtocolServer::processSetRotProtocol(const Protocol& recvdProtocol) {
     int32_t ret = 0;
     if (recvdProtocol.getLength() == 6){
         const uint8_t *data = recvdProtocol.getData();
+        uint32_t u = 0;
         for (uint8_t i = 0; i < 4; i++) {
-            ret |= static_cast<int32_t>(data[i]) << ((3-i)*8);
+            u |= static_cast<uint32_t>(data[i]) << ((3-i)*8);
         }
+        ret = static_cast<int32_t>(u);
     }
     return ret;
 }
