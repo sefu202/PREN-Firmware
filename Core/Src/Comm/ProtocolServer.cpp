@@ -239,7 +239,7 @@ void ProtocolServer::createStateReply(Protocol& responseProtocol) {
     const int32_t rotPosition = processImage.getRotPosition();
 
     for (uint8_t i = 0; i < 4; i++) {
-        responseProtocol.appendByte((rotPosition >> ((3-i)*8)) & 0xff);
+        responseProtocol.appendByte((static_cast<uint32_t>(rotPosition) >> ((3-i)*8)) & 0xff);
     }
 
     responseProtocol.appendByte(processImage.isInitialized());

@@ -10,11 +10,36 @@ import socket
 import threading
 import time
 import copy
+import math
 
 HOST = "10.0.1.1"   # Server-Adresse
 PORT = 36769        # Server-Port
 POLLING_INTERVAL_MS = 50
 PEACE_WAR_SWITCH = "PEACE" # Set to WAR to enable confetti cannon
+
+def coolEffect():
+    t = 0
+    while True:
+        # 120° = 2π/3 radians
+        r = (math.sin(t) + 1) / 2
+        g = (math.sin(t + 2 * math.pi / 3) + 1) / 2
+        b = (math.sin(t + 4 * math.pi / 3) + 1) / 2
+
+        cu.setLed(
+            int(r * 255),
+            int(g * 255),
+            int(b * 255)
+        )
+
+        t += 0.05
+        time.sleep(0.03)
+def flash():
+    while True:
+        cu.setLed(255, 255, 255)
+        time.sleep(0.1)
+
+        cu.setLed(0, 0, 0)
+        time.sleep(0.1)
 
 
 def stepnWaintX(cu, target):
@@ -289,8 +314,11 @@ def parseStateReply(response):
     pi.vacuumOn = bool(data[3])
     pi.xPositionSteps = (data[ 4] << 24) | (data[ 5] << 16) | (data[ 6] << 8) | data[ 7]
     pi.yPositionSteps = (data[ 8] << 24) | (data[ 9] << 16) | (data[10] << 8) | data[11]
-    pi.zPositionSteps = (data[12] << 24) | (data[13] << 16) | (data[14] << 8) | data[15]
-    pi.rotationSteps  = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19]
+    pi.zPositionSteps = (data[12] << 24) | (data[13] << 16) | (data[14] << 8) | data[15]    
+    pi.rotationSteps = (((data[16] & 0xFF) << 24) |((data[17] & 0xFF) << 16) |((data[18] & 0xFF) << 8)  |(data[19] & 0xFF))
+                        
+    if pi.rotationSteps & 0x80000000:
+        pi.rotationSteps -= 0x100000000
     pi.isInitialized = bool(data[20])
     return pi
 
@@ -338,42 +366,14 @@ if __name__ == "__main__":
     print(cu.getProcessImage().limitSwitches)
     """
     
+    flash()
 
-    cu.setLed(0,0,0)
+
+    
+
 
     print(cu.getProcessImage().isInitialized)
 
-    stepnWaitXY(cu, 3471, 892)
-
-    stepnWaitXY(cu, 128, 3764)
-    stepnWaitXY(cu, 3999, 2145)
-    stepnWaitXY(cu, 2450, 67)
-    stepnWaitXY(cu, 1783, 3201)
-    stepnWaitXY(cu, 860, 1459)
-    stepnWaitXY(cu, 3012, 4000)
-    stepnWaitXY(cu, 412, 2788)
-    stepnWaitXY(cu, 2234, 991)
-    stepnWaitXY(cu, 3901, 1560)
-    stepnWaitXY(cu, 1543, 2876)
-    stepnWaitXY(cu, 2890, 1024)
-    stepnWaitXY(cu, 67, 1998)
-    stepnWaitXY(cu, 4000, 3777)
-    stepnWaitXY(cu, 2211, 345)
-    stepnWaitXY(cu, 980, 410)
-    stepnWaitXY(cu, 3125, 2601)
-    stepnWaitXY(cu, 176, 3890)
-    stepnWaitXY(cu, 2684, 1765)
-    stepnWaitXY(cu, 1345, 1333)
-    stepnWaitXY(cu, 3778, 2902)
-    stepnWaitXY(cu, 1999, 2500)
-    stepnWaitXY(cu, 845, 3678)
-    stepnWaitXY(cu, 3022, 58)
-    stepnWaitXY(cu, 410, 2144)
-    stepnWaitXY(cu, 2501, 3999)
-    stepnWaitXY(cu, 3333, 1444)
-    stepnWaitXY(cu, 109, 3200)
-    stepnWaitXY(cu, 2877, 1988)
-    stepnWaitXY(cu, 3900, 765)
     cu.stopCommunication()
     
 

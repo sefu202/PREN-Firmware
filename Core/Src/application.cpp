@@ -115,8 +115,8 @@ extern "C" int application(void){
 
     LinearAxis xAxis        (step1, 200, 5000, 1000,   6766);  // a, maxSpeed, initSpeed, length
     LinearAxis yAxis        (step2, 200, 5000, 1000,   10000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxis        (step3, 200, 5000, 2500, 1000000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxisTwin    (step4, 200, 5000, 2500, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxis        (step3, 200, 500, 500, 1000000);  // a, maxSpeed, initSpeed, length
+    LinearAxis zAxisTwin    (step4, 200, 500, 500, 1000000);  // a, maxSpeed, initSpeed, length
     xAxis.setMotionTimerPartner(yAxis.getMotionTimer());
     yAxis.setMotionTimerPartner(xAxis.getMotionTimer());
     xAxis.init();
@@ -213,8 +213,8 @@ extern "C" int application(void){
 
         xAxis.update(limSw[0], limSw[1]);
         yAxis.update(limSw[2], limSw[3]);
-        zAxis.update(false, false);
-        zAxisTwin.update(false,false);
+        zAxis.update(limSw[4], limSw[5]);
+        zAxisTwin.update(limSw[6],limSw[7]);
 
         // Emergency Stop
         if (estop){
