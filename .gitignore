@@ -21,3 +21,4 @@ Core/Src/sysmem.c
 Core/Src/system_stm32f7xx.c
 cmake/*
 !cmake/gcc-arm-none-eabi.cmake
+*.pyc
