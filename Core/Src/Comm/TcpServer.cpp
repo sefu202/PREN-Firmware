@@ -165,14 +165,13 @@ err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         return ERR_INPROGRESS;
     }
 
-    assert(p->len < thisFromArg(arg)->m_sizeReceiveBuffer);
-    if (p->len < thisFromArg(arg)->m_sizeReceiveBuffer) {
+    assert(p->len <= thisFromArg(arg)->m_sizeReceiveBuffer);
+    if (p->len <= thisFromArg(arg)->m_sizeReceiveBuffer) {
         std::memcpy(thisFromArg(arg)->m_receiveBuffer, p->payload, p->len);
         thisFromArg(arg)->m_receivedBytes = p->len;
     }
     else {
         assert(0);
-        // todo this would lead to data loss
     }
 
     tcp_recved(tpcb, p->len);

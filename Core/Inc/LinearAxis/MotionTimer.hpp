@@ -25,11 +25,26 @@ public:
      */
     uint32_t tMin(uint32_t d);
 
-
+    /**
+     * @brief Recommends the ETA tick for the motion
+     * 
+     * @param etaTick the recommended ETA tick
+     */
     void reccomendETATick(uint32_t etaTick);
 
+    /**
+     * @brief Recommends the velocity for the motion, given the distance to move
+     * 
+     * @param d distance to move
+     * @return uint16_t recommended velocity
+     */
     uint16_t vReccomend(uint32_t d);
 
+    /**
+     * @brief Checks if a new ETA tick is available
+     * 
+     * @return bool true if a new ETA tick is available, false otherwise
+     */
     bool hasNewEtaTick();
 
 private:

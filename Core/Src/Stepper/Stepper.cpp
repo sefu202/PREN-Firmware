@@ -31,19 +31,25 @@ Stepper::Stepper(PinConfig pinConfig) {
 
     // Check if there was an unused stepper, if yes, use it
     assert(i < MAX_NUM_STEPPERS);
-    if (i < MAX_NUM_STEPPERS) {
-        HAL_NVIC_DisableIRQ(STEPPER_IRQ);
-        s_stepperPinConfig[m_stepperId].stepGpio = pinConfig.stepGpio;
-        s_stepperPinConfig[m_stepperId].dirGpio = pinConfig.dirGpio;
-        s_stepperPinConfig[m_stepperId].stepPin = pinConfig.stepPin;
-        s_stepperPinConfig[m_stepperId].dirPin = pinConfig.dirPin;
-        HAL_NVIC_EnableIRQ(STEPPER_IRQ);
-    }
+    
+    HAL_NVIC_DisableIRQ(STEPPER_IRQ);
+    s_stepperPinConfig[m_stepperId].stepGpio = pinConfig.stepGpio;
+    s_stepperPinConfig[m_stepperId].dirGpio = pinConfig.dirGpio;
+    s_stepperPinConfig[m_stepperId].stepPin = pinConfig.stepPin;
+    s_stepperPinConfig[m_stepperId].dirPin = pinConfig.dirPin;
+    HAL_NVIC_EnableIRQ(STEPPER_IRQ);
 }
 
 void Stepper::step(int32_t steps) {
     HAL_NVIC_DisableIRQ(STEPPER_IRQ);
-    s_remainingSteps[m_stepperId] += steps;
+    // Prevent integer overflow: check if addition would overflow
+    if ((steps > 0 && s_remainingSteps[m_stepperId] > INT32_MAX - steps) ||
+        (steps < 0 && s_remainingSteps[m_stepperId] < INT32_MIN - steps)) {
+        // Handle overflow by clamping to max/min values
+        s_remainingSteps[m_stepperId] = (steps > 0) ? INT32_MAX : INT32_MIN;
+    } else {
+        s_remainingSteps[m_stepperId] += steps;
+    }
     HAL_NVIC_EnableIRQ(STEPPER_IRQ);
 }
 
@@ -57,7 +63,13 @@ void Stepper::setSpeed(uint16_t speed) {
         ticks = 0;
     }
     else {
-        ticks = STEPPER_MAX_SPEED * STEPPER_MIN_TICKS_BETWEEN_STEP / speed;
+        // Prevent potential overflow: use 64-bit intermediate calculation
+        uint32_t numerator = static_cast<uint32_t>(STEPPER_MAX_SPEED) * STEPPER_MIN_TICKS_BETWEEN_STEP;
+        ticks = numerator / speed;
+        // Ensure ticks doesn't exceed uint16_t range
+        if (ticks > UINT16_MAX) {
+            ticks = UINT16_MAX;
+        }
     }
     HAL_NVIC_DisableIRQ(STEPPER_IRQ);
     s_tickBetweenSteps[m_stepperId] = ticks;
@@ -78,10 +90,10 @@ void Stepper::resetSteps() {
     HAL_NVIC_EnableIRQ(STEPPER_IRQ);    
 }
 
-volatile Stepper::PinConfig Stepper::s_stepperPinConfig[MAX_NUM_STEPPERS];
-volatile int32_t Stepper::s_remainingSteps[MAX_NUM_STEPPERS];      // remaining steps and direction
-volatile uint16_t Stepper::s_currentTickBetweenSteps[MAX_NUM_STEPPERS];   // for speed control
-volatile uint16_t Stepper::s_tickBetweenSteps[MAX_NUM_STEPPERS];   // for speed control
+volatile Stepper::PinConfig Stepper::s_stepperPinConfig[MAX_NUM_STEPPERS] = {};
+volatile int32_t Stepper::s_remainingSteps[MAX_NUM_STEPPERS] = {};
+volatile uint16_t Stepper::s_currentTickBetweenSteps[MAX_NUM_STEPPERS] = {};
+volatile uint16_t Stepper::s_tickBetweenSteps[MAX_NUM_STEPPERS] = {};
 
 void Stepper::ISR(){
 

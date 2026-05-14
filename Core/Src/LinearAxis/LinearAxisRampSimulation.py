@@ -64,7 +64,7 @@ plt.grid(True)
 plt.subplot(3, 1, 3)
 plt.plot(t, acceleration)
 plt.ylabel("a(t) acceleration")
-plt.xlabel("Time [s]")
+plt.xlabel("Time [ms]")
 plt.grid(True)
 
 plt.tight_layout()

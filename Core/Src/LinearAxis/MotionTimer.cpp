@@ -14,10 +14,17 @@
 #include "LinearAxis/MotionTimer.hpp"
 
 MotionTimer::MotionTimer(uint16_t a, uint16_t maxSpeed) : m_maxSpeed(maxSpeed), m_a(a*100){
-
+    // Prevent division by zero
+    if (m_a == 0) m_a = 1;
+    if (m_maxSpeed == 0) m_maxSpeed = 1;
 }
 
 uint32_t MotionTimer::tMin(uint32_t d){
+    // Additional safety check
+    if (m_a == 0 || m_maxSpeed == 0) {
+        return 0;
+    }
+
     uint64_t d_crit =
         ((uint64_t)m_maxSpeed * m_maxSpeed) / m_a;
 

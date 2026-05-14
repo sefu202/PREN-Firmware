@@ -37,9 +37,9 @@ void SoftPWM::set(uint32_t setPoint) {
     s_setPoint[m_pwmID] = setPoint; // assume atomic copy
 }
 
-volatile SoftPWM::PinConfig SoftPWM::s_pwmPinConfig[MAX_NUM_PWM_PINS];
-volatile uint32_t SoftPWM::s_count;
-volatile uint32_t SoftPWM::s_setPoint[MAX_NUM_PWM_PINS];
+volatile SoftPWM::PinConfig SoftPWM::s_pwmPinConfig[MAX_NUM_PWM_PINS] = {};
+volatile uint32_t SoftPWM::s_count = 0;
+volatile uint32_t SoftPWM::s_setPoint[MAX_NUM_PWM_PINS] = {};
 
 void SoftPWM::ISR() {
     for (uint8_t i = 0; i < MAX_NUM_PWM_PINS; i++) {
