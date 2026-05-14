@@ -81,17 +81,23 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
 
         m_stepper.setSpeed(m_ramp.getSpeed(d));
     }
-    else {
-        m_stepper.setSpeed(m_initSpeed);
-        m_ramp.reset();
-    }
-
 
     if (m_lowLimitSwitchEdgePos(lowLimitSwitch)) {
         m_initialized = true;
         m_positionSetPoint = std::max(m_positionSetPoint, 0l);
         m_stepper.resetSteps();
         m_stepper.step(m_positionSetPoint);
+
+        uint32_t lowLimitSwitchPositionMeasured = getCurrentPosition();
+
+        if (lowLimitSwitchPositionMeasured > LINEAR_AXIS_MARGIN) {
+            estop();
+        }
+        else {
+            m_positionSetPoint = std::min(m_positionSetPoint, static_cast<int32_t>(m_length));
+            m_stepper.resetSteps();
+            m_stepper.step(m_positionSetPoint);
+        }
     }
 
     // Check if axis is already on limit switch at start:
@@ -100,18 +106,28 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
         m_uncertainInitialized = true;
         m_stepper.resetSteps();
         m_stepper.step(200);
+        m_stepper.setSpeed(m_initSpeed);
+        m_ramp.reset();
     }
     else if (m_uncertainInitialized && !m_initialized) {
         m_stepper.resetSteps();
         m_stepper.step(INT32_MIN);
         m_uncertainInitialized = false;
+        m_stepper.setSpeed(m_initSpeed);
+        m_ramp.reset();
     }
 
     if (m_highLimitSwitchEdgePos(highLimitSwitch)) {
         m_highLimitSwitchPositionMeasured = getCurrentPosition();
-        m_positionSetPoint = std::min(m_positionSetPoint, (int32_t)m_length);
-        m_stepper.resetSteps();
-        m_stepper.step(m_positionSetPoint - m_length);
+
+        if (m_highLimitSwitchPositionMeasured < m_length - LINEAR_AXIS_MARGIN || m_highLimitSwitchPositionMeasured > m_length + LINEAR_AXIS_MARGIN) {
+            estop();
+        }
+        else {
+            m_positionSetPoint = std::min(m_positionSetPoint, static_cast<int32_t>(m_length));
+            m_stepper.resetSteps();
+            m_stepper.step(m_positionSetPoint - m_length);
+        }
     }
 }
 

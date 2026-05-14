@@ -16,6 +16,9 @@
 #include "Util/EdgePos.hpp"
 #include "LinearAxis/MotionTimer.hpp"
 
+#define LINEAR_AXIS_MARGIN 100   // margin for limit switch position measurement in steps, 
+                                 // generate estop when measured position is outside of [length - margin, length + margin]
+
 
 class LinearAxis {
 public:
