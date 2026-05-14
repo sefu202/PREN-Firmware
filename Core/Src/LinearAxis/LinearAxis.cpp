@@ -14,11 +14,12 @@
 
 
 
-LinearAxis::LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpeed, uint16_t initSpeed, uint32_t length) 
+LinearAxis::LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpeed, uint16_t initSpeed, uint32_t length, uint32_t margin) 
   : m_stepper(stepper), 
     m_ramp(maxA, maxSpeed), 
     m_initSpeed(initSpeed),
     m_length(length), 
+    m_margin(margin),
     m_lowLimitSwitchEdgePos(true),
     m_highLimitSwitchEdgePos(true), 
     m_motionTimer(maxA, maxSpeed) {
@@ -90,7 +91,7 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
 
         uint32_t lowLimitSwitchPositionMeasured = getCurrentPosition();
 
-        if (lowLimitSwitchPositionMeasured > LINEAR_AXIS_MARGIN) {
+        if (lowLimitSwitchPositionMeasured > m_margin) {
             estop();
         }
         else {
@@ -120,7 +121,7 @@ void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
     if (m_highLimitSwitchEdgePos(highLimitSwitch)) {
         m_highLimitSwitchPositionMeasured = getCurrentPosition();
 
-        if (m_highLimitSwitchPositionMeasured < m_length - LINEAR_AXIS_MARGIN || m_highLimitSwitchPositionMeasured > m_length + LINEAR_AXIS_MARGIN) {
+        if (m_highLimitSwitchPositionMeasured < m_length - m_margin || m_highLimitSwitchPositionMeasured > m_length + m_margin) {
             estop();
         }
         else {

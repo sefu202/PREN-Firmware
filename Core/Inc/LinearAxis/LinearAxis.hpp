@@ -16,9 +16,6 @@
 #include "Util/EdgePos.hpp"
 #include "LinearAxis/MotionTimer.hpp"
 
-#define LINEAR_AXIS_MARGIN 100   // margin for limit switch position measurement in steps, 
-                                 // generate estop when measured position is outside of [length - margin, length + margin]
-
 
 class LinearAxis {
 public:
@@ -30,8 +27,9 @@ public:
      * @param maxSpeed max speed in steps / s
      * @param initSpeed speed when initializing
      * @param length length of the linear axis in steps
+     * @param margin acceptable limit switch margin in steps
      */
-    LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpeed, uint16_t initSpeed, uint32_t length);
+    LinearAxis(Stepper::Stepper& stepper, uint16_t maxA, uint16_t maxSpeed, uint16_t initSpeed, uint32_t length, uint32_t margin);
 
     void setMotionTimerPartner(MotionTimer* partner);
 
@@ -95,6 +93,7 @@ private:
     uint16_t m_initSpeed;
     uint32_t m_highLimitSwitchPositionMeasured = 0; // measured position of high limit switch, set when high limit switch gets touched
     uint32_t m_length;
+    uint32_t m_margin;
     EdgePos m_lowLimitSwitchEdgePos, m_highLimitSwitchEdgePos;
     MotionTimer m_motionTimer;
     MotionTimer *m_motionTimerPartner = nullptr;

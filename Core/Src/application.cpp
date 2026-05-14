@@ -113,10 +113,10 @@ extern "C" int application(void){
     // m0 set, m1 reset: 200 steps / r
     // m0 reset, m1 set: 400 steps / r
 
-    LinearAxis xAxis        (step1, 200, 5000, 1000,   6696);  // a, maxSpeed, initSpeed, length
-    LinearAxis yAxis        (step2, 200, 5000, 1000,   5731);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxis        (step3, 200, 2500, 500, 3000);  // a, maxSpeed, initSpeed, length
-    LinearAxis zAxisTwin    (step4, 200, 2500, 500, 3000);  // a, maxSpeed, initSpeed, length
+    LinearAxis xAxis        (step1, 200, 5000, 1000, 6696,  20);  // a, maxSpeed, initSpeed, length, margin
+    LinearAxis yAxis        (step2, 200, 5000, 1000, 5731,  20);  // a, maxSpeed, initSpeed, length, margin
+    LinearAxis zAxis        (step3, 200, 2500, 500,  3000, 500);  // a, maxSpeed, initSpeed, length, margin
+    LinearAxis zAxisTwin    (step4, 200, 2500, 500,  3000, 500);  // a, maxSpeed, initSpeed, length, margin
     xAxis.setMotionTimerPartner(yAxis.getMotionTimer());
     yAxis.setMotionTimerPartner(xAxis.getMotionTimer());
     xAxis.init();
