@@ -68,12 +68,12 @@ void LinearAxis::init() {
         m_stepper.resetSteps();
         m_stepper.step(INT32_MIN);
         m_positionSetPoint = 0;
+        m_stepper.setSpeed(m_initSpeed);
     }
 }
 
 void LinearAxis::update(bool lowLimitSwitch, bool highLimitSwitch) {
-    if (m_initialized && !lowLimitSwitch && !highLimitSwitch) {
-
+    if (m_initialized /*&& !lowLimitSwitch && !highLimitSwitch*/) {
         uint32_t d = std::abs(m_stepper.getRemainingSteps());
 
         if (m_motionTimer.hasNewEtaTick() && d > 0) {

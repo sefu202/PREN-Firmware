@@ -30,38 +30,23 @@ void ProtocolServer::update(){
 
     const uint16_t receivedBytes = tcpserver.getReceivedBytes();
     uint16_t readIdx = 0;
-    while(readIdx < receivedBytes && readIdx < m_buffer.size()) {
+    while(readIdx < receivedBytes) {
 
         auto len = m_unfinishedProtocol.getLength();
         if (len) {
-            const uint8_t bytesToRead = std::min({len - m_unfinishedProtocol.getFillLevel(),
-                                                 receivedBytes - readIdx,
-                                                 static_cast<uint16_t>(m_buffer.size() - readIdx)});
-            if (bytesToRead > 0) {
-                m_unfinishedProtocol.appendData(m_buffer.data() + readIdx, bytesToRead);
-                readIdx += bytesToRead;
-            } else {
-                break; // Prevent infinite loop
-            }
+            const uint8_t bytesToRead = std::min(len - m_unfinishedProtocol.getFillLevel(), receivedBytes - readIdx);
+            m_unfinishedProtocol.appendData(m_buffer.data() + readIdx, bytesToRead);
+            readIdx += bytesToRead;
         }
         else if (m_unfinishedProtocol.getFillLevel() == 1) {
-            if (readIdx < receivedBytes && readIdx < m_buffer.size()) {
-                m_unfinishedProtocol.setLength(m_buffer[readIdx++]);
-            } else {
-                break;
-            }
+            m_unfinishedProtocol.setLength(m_buffer[readIdx++]);
         }
         else if (m_unfinishedProtocol.getFillLevel() == 0){
-            if (readIdx < receivedBytes && readIdx < m_buffer.size()) {
-                m_unfinishedProtocol.setOpcode(m_buffer[readIdx++]);
-            } else {
-                break;
-            }
+            m_unfinishedProtocol.setOpcode(m_buffer[readIdx++]);
         }
         else {
-            // Invalid state - reset protocol
-            m_unfinishedProtocol.clear();
-            break;
+            assert(0);
+            // bad todo warn
         }
 
         len = m_unfinishedProtocol.getLength();
@@ -74,10 +59,8 @@ void ProtocolServer::update(){
             tcpserver.write(response.serialize(), response.getLength());
         }
 
-        // Safety check: prevent infinite loops
-        if (readIdx > receivedBytes || readIdx >= m_buffer.size()) {
-            break;
-        }
+        assert(readIdx <= receivedBytes); // todo
+        // todo add receive timeout to close dead connection
     }
 
     // If data has been received and processed, prepare to receive new data
