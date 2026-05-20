@@ -1,50 +1,58 @@
-/**
- * @file Debounce.cpp
- * @author Josef Aschwanden (josef.aschwanden@stud.hslu.ch)
- * @brief 
- * @version 0.1
- * @date 2025-12-26
- * 
- * @copyright Copyright (c) 2025
- * 
- */
 #include <cstdint>
 #include "Util/Debounce.hpp"
 #include "stm32f7xx_hal.h"
 
-bool Debounce::operator()(bool current) {
+
+bool Debounce::operator()(bool current)
+{
     return (*this)(current, debounceTime);
 }
 
-bool Debounce::operator()(bool current, uint32_t debounceTime) {
+bool Debounce::operator()(bool current, uint32_t debounceTime)
+{
     uint32_t now = HAL_GetTick();
 
-    // Not locked -> accept first edge immediately
-    if (tickFirstRisingEdge == 0 && tickFirstFallingEdge == 0)
-    {
-        if (current != lastInput)
-        {
-            state = current;
+    switch (stateFsm) {
+        case State::LowReady: {
+            state = false;
 
-            if (current){
-                tickFirstRisingEdge = now;
+            if (current) // rising edge
+            {
+                stateFsm = State::HighLocked;
+                lockStart = now;
             }
-            else {
-                tickFirstFallingEdge = now;
-            }
+            break;
         }
-    }
-    else
-    {
-        // Lockout active -> check if debounce time expired
-        uint32_t lockStart =
-            tickFirstRisingEdge ? tickFirstRisingEdge
-                                : tickFirstFallingEdge;
 
-        if ((now - lockStart) >= debounceTime)
-        {
-            tickFirstRisingEdge  = 0;
-            tickFirstFallingEdge = 0;
+        case State::HighLocked: {
+            state = true;
+
+            if ((now - lockStart) >= debounceTime)
+            {
+                stateFsm = State::HighReady;
+            }
+            break;
+        }
+
+        case State::HighReady: {
+            state = true;
+
+            if (!current) // falling edge
+            {
+                stateFsm = State::LowLocked;
+                lockStart = now;
+            }
+            break;
+        }
+
+        case State::LowLocked: {
+            state = false;
+
+            if ((now - lockStart) >= debounceTime)
+            {
+                stateFsm = State::LowReady;
+            }
+            break;
         }
     }
 
@@ -52,6 +60,7 @@ bool Debounce::operator()(bool current, uint32_t debounceTime) {
     return state;
 }
 
-Debounce::operator bool() const {
+Debounce::operator bool() const
+{
     return state;
 }

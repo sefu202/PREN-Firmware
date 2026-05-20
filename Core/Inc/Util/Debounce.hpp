@@ -11,14 +11,21 @@
 #pragma once
 
 struct Debounce{
-    uint32_t tickFirstRisingEdge  = 0;
-    uint32_t tickFirstFallingEdge = 0;
+    enum class State : uint8_t {
+        LowReady,
+        LowLocked,
+        HighReady,
+        HighLocked
+    };
 
     uint32_t debounceTime = 5;  // ms
 
 private:
-    bool state      = false;  // output state
-    bool lastInput  = false;
+
+    State stateFsm = State::LowReady;
+    uint32_t lockStart = 0;
+    bool state = false;  // output state
+    bool lastInput = false;
 
 public:
     bool operator()(bool current);
