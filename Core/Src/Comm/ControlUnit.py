@@ -76,7 +76,7 @@ class ControlUnit:
         Constructor
         """
         self._stopCommunication = False
-        self._processImage = ProcessImage
+        self._processImage = ProcessImage()
         self._mutex = threading.Lock()  # only one 
 
 

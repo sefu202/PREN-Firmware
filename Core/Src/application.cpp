@@ -12,6 +12,7 @@
 #include "Util/Debounce.hpp"
 #include "Actuators/Vacuum.hpp"
 #include "Actuators/ConfettiCannon.hpp"
+#include "Actuators/LedFlash.hpp"
 #include "Util/SoftPWM.hpp"
 
 using namespace Stepper;
@@ -43,10 +44,9 @@ void writeDO(const std::array<bool, 13>& DO) {
     HAL_GPIO_WritePin( DO6_GPIO_Port,  DO6_Pin, DO[ 6] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin( DO7_GPIO_Port,  DO7_Pin, DO[ 7] ? GPIO_PIN_SET : GPIO_PIN_RESET);*/
     HAL_GPIO_WritePin( DO8_GPIO_Port,  DO8_Pin, DO[ 8] ? GPIO_PIN_SET : GPIO_PIN_RESET); 
-    /* Written by PWM */
-    /*HAL_GPIO_WritePin( DO9_GPIO_Port,  DO9_Pin, DO[ 9] ? GPIO_PIN_SET : GPIO_PIN_RESET);
+    HAL_GPIO_WritePin( DO9_GPIO_Port,  DO9_Pin, DO[ 9] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(DO10_GPIO_Port, DO10_Pin, DO[10] ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin(DO11_GPIO_Port, DO11_Pin, DO[11] ? GPIO_PIN_SET : GPIO_PIN_RESET); */ 
+    HAL_GPIO_WritePin(DO11_GPIO_Port, DO11_Pin, DO[11] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(DO12_GPIO_Port, DO12_Pin, DO[12] ? GPIO_PIN_SET : GPIO_PIN_RESET);
 }
 
@@ -123,6 +123,7 @@ extern "C" int application(void){
     yAxis.init();
     zAxis.init();
     zAxisTwin.init();
+    bool zSafePosition = false;
 
     Stepper::Stepper& cAxis = step5;
     cAxis.setSpeed(5000);
@@ -160,24 +161,15 @@ extern "C" int application(void){
         .gpio = DO7_GPIO_Port,
         .pin = DO7_Pin
     };
-    SoftPWM::PinConfig ledRedConfig2 = {
-        .gpio = DO9_GPIO_Port,
-        .pin = DO9_Pin
-    };
-    SoftPWM::PinConfig ledGreenConfig2 = {
-        .gpio = DO10_GPIO_Port,
-        .pin = DO10_Pin
-    };
-    SoftPWM::PinConfig ledBlueConfig2 = {
-        .gpio = DO11_GPIO_Port,
-        .pin = DO11_Pin
-    };
+
     SoftPWM ledRed(ledRedConfig);
     SoftPWM ledGreen(ledGreenConfig);
     SoftPWM ledBlue(ledBlueConfig);
-    SoftPWM ledRed2(ledRedConfig2);
-    SoftPWM ledGreen2(ledGreenConfig2);
-    SoftPWM ledBlue2(ledBlueConfig2);
+
+    LedFlash flash(2000);  // 2000 ms max
+
+    EdgePos zInitializedEdgePos;
+
 
     HAL_Delay(500);
 
@@ -216,6 +208,16 @@ extern "C" int application(void){
         zAxis.update(limSw[4], limSw[5]);
         zAxisTwin.update(limSw[6],limSw[7]);
 
+        bool zInitialized = zAxis.isInitialized() && zAxisTwin.isInitialized();
+        zInitializedEdgePos(zInitialized);
+
+        if (zInitializedEdgePos) {
+            zAxis.moveTo(2000);
+            zAxisTwin.moveTo(2000);
+        }
+
+        zSafePosition = (zInitialized && zAxis.getCurrentPosition() >= 1000 && zAxisTwin.getCurrentPosition() >= 1000) || (zSafePosition && !estop);
+
         // Emergency Stop
         if (estop){
             xAxis.estop();
@@ -223,8 +225,8 @@ extern "C" int application(void){
             zAxis.estop();
             zAxisTwin.estop();
         }
-        HAL_GPIO_WritePin(STEP1_ENABLE_GPIO_Port, STEP1_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
-        HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
+        HAL_GPIO_WritePin(STEP1_ENABLE_GPIO_Port, STEP1_ENABLE_Pin, (estop || !zSafePosition) ? GPIO_PIN_RESET : GPIO_PIN_SET);  // wait for having a safe z position before moving x and y
+        HAL_GPIO_WritePin(STEP2_ENABLE_GPIO_Port, STEP2_ENABLE_Pin, (estop || !zSafePosition) ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP3_ENABLE_GPIO_Port, STEP3_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP4_ENABLE_GPIO_Port, STEP4_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
         HAL_GPIO_WritePin(STEP5_ENABLE_GPIO_Port, STEP5_ENABLE_Pin, estop ? GPIO_PIN_RESET : GPIO_PIN_SET);
@@ -243,23 +245,32 @@ extern "C" int application(void){
         cannon.update(processImage.getShootConfetti(), estop);
 
         // RGB LED
-        ledRed.set(processImage.getLed().r);
-        ledGreen.set(processImage.getLed().g);
-        ledBlue.set(processImage.getLed().b);
-        ledRed2.set(processImage.getLed().r);
-        ledGreen2.set(processImage.getLed().g);
-        ledBlue2.set(processImage.getLed().b);
+        const RGB led = processImage.getLed();
+        ledRed.set(led.r);
+        ledGreen.set(led.g);
+        ledBlue.set(led.b);
 
+        // Flash led
+        if (led.r == 255 && led.g == 255 && led.b == 255){
+            flash.enable(true);
+        }
+        else {
+            flash.enable(false);
+        }
+        flash.update();
 
+        // DOs
         DO[1] = vacuum.oRunPump();   // Vacuum Pump
         DO[2] = vacuum.oEnableValve();   // Valve
         DO[3] = cannon.oIgnite(); // confetti cannon
         // DO[5] = red
         //DO[6] = green
         //DO[7] = blue
-        // DO[9] = red2
-        //DO[10] = green2
-        //DO[11] = blue2
+        DO[ 8] = flash.o();
+        DO[ 9] = flash.o();
+        DO[10] = flash.o();
+        DO[11] = flash.o();
+        DO[12] = flash.o();
 
 
         writeDO(DO);
