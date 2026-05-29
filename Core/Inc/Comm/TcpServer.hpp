@@ -76,6 +76,19 @@ private:
     static err_t recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err);
 
     /**
+     * @brief Poll the connection, closes the connection after 1s of inactivity
+     * 
+     * @param arg this pointer
+     * @param tpcb pcb
+     * @return err_t ERR_OK
+     */
+    static err_t poll(void *arg, tcp_pcb *tpcb);
+
+    /**
+     * @brief Refresh connection activity ticks
+     */
+    void refreshActivity();
+    /**
      * @brief Converts arg from LwIP callbacks to a this object
      * @note arg gets set to this when registering the callbacks
      * @param arg arg from LwIP
@@ -92,7 +105,7 @@ private:
     uint16_t m_receivedBytes = 0;   // received bytes in received buffer
     void *m_receiveBuffer = nullptr;
     uint16_t m_sizeReceiveBuffer = 0;
-
+    uint32_t m_lastActivityMs = 0;
 
 };
 

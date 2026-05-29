@@ -121,12 +121,18 @@ err_t TcpServer::accept(void *arg, struct tcp_pcb *newpcb, err_t err){
     }
 
     tcp_arg(newpcb, arg);
-    tcp_recv(newpcb, recv);
+    tcp_recv(newpcb, recv);    
+    tcp_poll(newpcb, poll, 2);
 
     thisFromArg(arg)->m_state = State::ACCEPTED;
     thisFromArg(arg)->m_connectionPcb = newpcb;
+    thisFromArg(arg)->refreshActivity();
 
     return ERR_OK;
+}
+
+void TcpServer::refreshActivity(){
+    m_lastActivityMs = HAL_GetTick();
 }
 
 err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err){
@@ -162,6 +168,7 @@ err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
 
     // Receive buffer not yet ready => refuse data
     if (thisFromArg(arg)->m_receiveBuffer == nullptr || thisFromArg(arg)->m_receivedBytes != 0) {
+        pbuf_free(p);
         return ERR_INPROGRESS;
     }
 
@@ -173,7 +180,7 @@ err_t TcpServer::recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     else {
         assert(0);
     }
-
+    thisFromArg(arg)->refreshActivity();
     tcp_recved(tpcb, p->len);
 
     pbuf_free(p);
@@ -186,6 +193,30 @@ TcpServer* TcpServer::thisFromArg(void *arg) {
     return static_cast<TcpServer*>(arg);
 }
 
+err_t TcpServer::poll(void *arg, tcp_pcb *tpcb)
+{
+    if (!arg || !tpcb) {
+        return ERR_OK;
+    }
 
+    TcpServer *server = thisFromArg(arg);
+
+    uint32_t now = HAL_GetTick();
+
+    // 1000 ms timeout
+    if ((now - server->m_lastActivityMs) >= 1000) {
+
+        tcp_arg(tpcb, nullptr);
+        tcp_recv(tpcb, nullptr);
+        tcp_poll(tpcb, nullptr, 0);
+
+        tcp_close(tpcb);
+
+        server->m_connectionPcb = nullptr;
+        server->m_state = State::LISTEN;
+    }
+
+    return ERR_OK;
+}
 
 }
