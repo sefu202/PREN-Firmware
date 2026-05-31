@@ -39,10 +39,9 @@ void writeDO(const std::array<bool, 13>& DO) {
     HAL_GPIO_WritePin( DO2_GPIO_Port,  DO2_Pin, DO[ 2] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin( DO3_GPIO_Port,  DO3_Pin, DO[ 3] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin( DO4_GPIO_Port,  DO4_Pin, DO[ 4] ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    /* Written by PWM!
     HAL_GPIO_WritePin( DO5_GPIO_Port,  DO5_Pin, DO[ 5] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin( DO6_GPIO_Port,  DO6_Pin, DO[ 6] ? GPIO_PIN_SET : GPIO_PIN_RESET);
-    HAL_GPIO_WritePin( DO7_GPIO_Port,  DO7_Pin, DO[ 7] ? GPIO_PIN_SET : GPIO_PIN_RESET);*/
+    HAL_GPIO_WritePin( DO7_GPIO_Port,  DO7_Pin, DO[ 7] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin( DO8_GPIO_Port,  DO8_Pin, DO[ 8] ? GPIO_PIN_SET : GPIO_PIN_RESET); 
     HAL_GPIO_WritePin( DO9_GPIO_Port,  DO9_Pin, DO[ 9] ? GPIO_PIN_SET : GPIO_PIN_RESET);
     HAL_GPIO_WritePin(DO10_GPIO_Port, DO10_Pin, DO[10] ? GPIO_PIN_SET : GPIO_PIN_RESET);
@@ -148,28 +147,9 @@ extern "C" int application(void){
     // Confetti Cannon Subsystem
     ConfettiCannon cannon;
 
-    // RGB
-    SoftPWM::PinConfig ledRedConfig = {
-        .gpio = DO5_GPIO_Port,
-        .pin = DO5_Pin
-    };
-    SoftPWM::PinConfig ledGreenConfig = {
-        .gpio = DO6_GPIO_Port,
-        .pin = DO6_Pin
-    };
-    SoftPWM::PinConfig ledBlueConfig = {
-        .gpio = DO7_GPIO_Port,
-        .pin = DO7_Pin
-    };
-
-    SoftPWM ledRed(ledRedConfig);
-    SoftPWM ledGreen(ledGreenConfig);
-    SoftPWM ledBlue(ledBlueConfig);
-
     LedFlash flash(2000);  // 2000 ms max
 
     EdgePos zInitializedEdgePos;
-
 
     HAL_Delay(500);
 
@@ -246,9 +226,6 @@ extern "C" int application(void){
 
         // RGB LED
         const RGB led = processImage.getLed();
-        ledRed.set(led.r);
-        ledGreen.set(led.g);
-        ledBlue.set(led.b);
 
         // Flash led
         if (led.r == 255 && led.g == 255 && led.b == 255){
@@ -260,12 +237,13 @@ extern "C" int application(void){
         flash.update();
 
         // DOs
-        DO[1] = vacuum.oRunPump();   // Vacuum Pump
-        DO[2] = vacuum.oEnableValve();   // Valve
-        DO[3] = cannon.oIgnite(); // confetti cannon
-        // DO[5] = red
-        //DO[6] = green
-        //DO[7] = blue
+        DO[ 1] = vacuum.oRunPump();   // Vacuum Pump
+        DO[ 2] = vacuum.oEnableValve();   // Valve
+        DO[ 3] = cannon.oIgnite(); // confetti cannon
+        DO[ 4] = DO[4];
+        DO[ 5] = DO[5];
+        DO[ 6] = DO[6];
+        DO[ 7] = DO[7];
         DO[ 8] = flash.o();
         DO[ 9] = flash.o();
         DO[10] = flash.o();
